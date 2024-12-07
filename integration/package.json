@@ -1,0 +1,37 @@
+{
+  "dependencies": {
+    "@discordjs/rest": "^1.7.0",
+    "body-parser": "^1.20.2",
+    "discord-webhook-node": "^1.1.8",
+    "discord.js": "^14.9.0",
+    "ejs": "^3.1.9",
+    "express-session": "^1.17.3",
+    "express.js": "^1.0.0",
+    "gamedig": "^4.0.6",
+    "http": "^0.0.1-security",
+    "https": "^1.0.0",
+    "mc-server-discord-bot": "file:",
+    "node-fetch": "^2.6.9",
+    "path": "^0.12.7",
+    "socket.io": "^4.6.1"
+  },
+  "name": "minecraft-plugin-integration",
+  "version": "0.0.1",
+  "description": "discord bot to monitor the minecraft server",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js",
+    "start": "node app.js"
+  },
+  "author": "superchicken962",
+  "license": "ISC",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Superchicken962/minecraft-web-integration.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Superchicken962/minecraft-web-integration/issues"
+  },
+  "homepage": "https://github.com/Superchicken962/minecraft-web-integration#readme"
+}

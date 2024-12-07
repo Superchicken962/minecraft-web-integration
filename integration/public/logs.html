@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>logs</title>
+    <link rel="stylesheet" href="/css/main"/>
+</head>
+<body>
+    <% if (!viewmode) { %>
+        <%- include("includes/choosemode.html"); %>
+    <% } %>
+    <% if (viewmode === "admin" && !auth) { %>
+        <%- include("includes/authenticate.html"); %>
+    <% } %>
+
+    <% if (viewmode === "admin" && auth === true) { %>
+        <p><i>Logged in as Admin <a href="/mode/null">(logout)</a></i></p>
+    <% } %>
+
+    <!-- Add last 15 or so logs -->
+
+    <% recentLogs.forEach((log) => { %>
+        <% var datesent = new Date(parseInt(log.event.time)); %>
+        <% console.log(log); %>
+        <% switch (log.event.type) { 
+
+            case "console": %>
+                <p style="color:white"><span style="color:grey;"><%= datesent.toLocaleString();%> </span><span style="color:red;">[Server Log] </span><%= log.log.content%></p>
+                <% break;
+
+            case "chat": %>
+                <p style="color:white"><span style="color:grey;"><%= datesent.toLocaleString();%> </span><b><%= log.sender.username%></b> : <%= log.message.content%></p>
+                <% break;
+
+            case "join":
+            case "leave": %>
+                <p style="color:white;"><span style="color:grey;"><%= datesent.toLocaleString();%> </span><span style="color:red;">[Server Log] </span><%= log.event.message.replace("%p", log.player.username)%></p>
+                <% break;
+
+            case "player_death": %>
+                <p style="color:white;"><span style="color:grey;"><%= datesent.toLocaleString();%> </span><span style="color:red;">[Server Log] </span><%- log.event.deathMessage.replace("%p", "<span style='color:#FFFF55;'>"+log.player.username+"</span>").replace("%k", "<span style='color:#FFFF55;'>"+log.killer.username+"</span>") %></p>
+                <% break;
+
+            case "server_start": %>
+                <p style="color:white;"><span style="color:grey;"><%= datesent.toLocaleString();%> </span><span style="color:red;">[Server Log] </span><%- log.event.message %></p>
+                <% break;
+
+            case "player_advancement": %>
+                <p style="color:white;"><span style="color:grey;"><%= datesent.toLocaleString();%> </span><span style="color:red;">[Server Log] </span><%- log.player.username + " has made the advancement [" + log.event.advancement.name +"]" %></p>
+                <% break;
+
+            } %>
+    <% }); %>
+</body>
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+<script>
+    const socket = io();
+    
+    socket.on("log:chat", (socket) => {
+        var datesent = new Date(parseInt(socket.event.time));
+        var p = document.createElement("p");
+        p.innerHTML = `<span style="color:grey;">${datesent.toLocaleString()} </span><b>${socket.sender.username}</b> : ${socket.message.content}`;
+        p.style.color = "white";
+        document.body.appendChild(p);
+    });
+
+    socket.on("log:console", (socket) => {
+        var datesent = new Date(parseInt(socket.event.time));
+        var p = document.createElement("p");
+        p.innerHTML = `<span style="color:grey;">${datesent.toLocaleString()} </span><span style="color:red;">[Server Log]</span> ${socket.log.content}`;
+        p.style.color = "white";
+        document.body.appendChild(p);
+    });
+
+    socket.on("log:playerjoinorleave", (socket) => {
+        var datesent = new Date(parseInt(socket.event.time));
+        var p = document.createElement("p");
+        p.innerHTML = `<span style="color:grey;">${datesent.toLocaleString()} </span><span style="color:red;">[Server Log]</span> ${socket.event.message.replace("%p", "<span class='player_name' style='color:#FFFF55;'>"+socket.player.username+"</span>")}`;
+        p.style.color = "white";
+        document.body.appendChild(p);
+    });
+
+    socket.on("log:playerdeath", (socket) => {
+        var datesent = new Date(parseInt(socket.event.time));
+        var p = document.createElement("p");
+        var message = socket.event.deathMessage.replace("%p", "<span class='player_name' style='color:#FFFF55;'>"+socket.player.username+"</span>").replace("%k", "<span class='killer_name' style='color:#FFFF55;'>"+socket.killer.username+"</span>");
+        p.innerHTML = `<span style="color:grey;">${datesent.toLocaleString()} </span><span style="color:red;">[Server Log]</span> ${message}`;
+        p.style.color = "white";
+        document.body.appendChild(p);
+    });
+
+    socket.on("log:serverstart", (socket) => {
+        var datesent = new Date(parseInt(socket.event.time));
+        var p = document.createElement("p");
+        p.innerHTML = `<span style="color:grey;">${datesent.toLocaleString()} </span><span style="color:red;">[Server Log]</span> ${socket.event.message}`;
+        p.style.color = "white";
+        document.body.appendChild(p);
+    });
+
+    socket.on("log:playeradvancement", (socket) => {
+        var datesent = new Date(parseInt(socket.event.time));
+        var p = document.createElement("p");
+        p.innerHTML = `<span style="color:grey;">${datesent.toLocaleString()} </span><span style="color:red;">[Server Log]</span> ${socket.player.username} has made the advancement [${socket.event.advancement.name}]`;
+        p.style.color = "white";
+        document.body.appendChild(p);
+    });
+
+    socket.on("action:*", (socket) => {
+        console.log(socket.eventTime);
+        var datesent = new Date(parseInt(socket.eventTime));
+        var p = document.createElement("p");
+        p.innerHTML = `<span style="color:grey;">${datesent.toLocaleString()} </span><span style="color:red;">[Server Log]</span> ${socket.player.username} has crafted ${socket.action.itemCrafted} (x${socket.action.amountCrafted})`;
+        p.style.color = "white";
+        document.body.appendChild(p);
+    });
+
+</script>
+</html>

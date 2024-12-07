@@ -1,0 +1,66 @@
+body {
+    background-color: rgb(55,55,55);
+    color: white;
+}
+
+.auth_box {
+    display: block;
+    position: absolute;
+    margin: auto;
+    width: fit-content;
+    min-width: 275px;
+    height: fit-content;
+    padding: 8px 22px;
+    background-color: rgb(25,25,25);
+    top:0;right:0;left:0;bottom:0;
+    text-align: center;
+    box-shadow: 5px 5px 15px black;
+    z-index: 201;
+}
+
+.auth_box .button {
+    display: block;
+    margin: auto;
+    text-align: center;
+    width: 200px;
+    height: 25px;
+    border-radius: 25px;
+    padding: 8px 2px;
+    font-size: 24px;
+    background-color: rgb(50,50,50);
+    margin-bottom: 10px;
+    transition: 0.5s ease-in-out transform, 0.5s ease-in-out box-shadow;
+    text-decoration: none;
+    color: white;
+}
+
+.auth_box .button:hover {
+    cursor: pointer;
+    transform: scale(1.2, 1.2);
+    box-shadow: 2px 2px 5px black;
+}
+
+.auth_box a {
+    color: white;
+}
+
+.auth_box input {
+    display: block;
+    margin: auto;
+    padding: 6px 8px;
+    width: fit-content;
+    margin-bottom: 10px;
+}
+
+.popup_background {
+    display: block;
+    margin: auto;
+    position: fixed;
+    top:0;right:0;left:0;bottom:0;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 200;
+}
+
+a {
+    color: white;
+}

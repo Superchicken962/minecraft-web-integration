@@ -1,0 +1,32 @@
+package me.johngrasinili.listeners;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+
+import me.johngrasinili.Functions;
+
+public class onPlayerDeath implements Listener {
+    @EventHandler
+    public void playerDeath(PlayerDeathEvent event) throws IOException, InterruptedException, URISyntaxException {
+        Functions Function = new Functions();
+
+        Player player = event.getEntity();
+        Player killer = player.getKiller();
+
+        String deathMsg = event.getDeathMessage();
+        String editedDeathMsg = deathMsg.replaceAll(player.getName(), "%p");
+        URI senderSkinUrl = player.getPlayerProfile().getTextures().getSkin().toURI();
+        
+        if (killer != null) {
+            editedDeathMsg = deathMsg.replaceAll(killer.getName(), "%k");
+        }
+
+        Function.sendLogsToServer(player.getName(), player.getPing(), player.isOp(), senderSkinUrl, editedDeathMsg, killer);
+    }
+}

@@ -1,0 +1,26 @@
+main: me.johngrasinili.App
+name: baby-gamers-mc-plugin
+version: 0.1
+api-version: 1.19
+commands:
+  protectBlocks:
+    description: Toggle protecting blocks on hit
+    usage: /<command>
+  clearProtectedBlocks:
+    description: Remove protection from all protected blocks
+    usage: /<command>
+  autoBridge:
+    description: Enable/Disable auto bridging
+    usage: /<command>
+  test:
+    description: test something, try your luck i guess
+    usage: /<command>
+  updateStats:
+    description: update player statistics
+    usage: /<command>
+  afk:
+    description: toggle afk mode
+    usage: /<command>
+  jaigame:
+    description: Join the JaiGame world
+    usage: /<command>
