@@ -1,11 +1,6 @@
 const express = require("express");
 const app = express.Router();
 const path = require("path");
-// const crypto = require("node:crypto");
-// crypto.randomBytes(48, (err, buffer) => {
-//     var token = buffer.toString("base64");
-//     console.log(token);
-// });
 const io = require("./app").socketio;
 const session = require("express-session");
 

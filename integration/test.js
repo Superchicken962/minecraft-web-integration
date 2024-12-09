@@ -1,25 +1,22 @@
-var fs = require('fs');
-var http = require('http');
-var https = require('https');
+const { Server } = require("socket.io");
+const http = require("http");
 
-const privateKey = fs.readFileSync("/etc/letsencrypt/live/babygamers.minecraftr.us/privkey.pem", "utf8");
-const certificate = fs.readFileSync("/etc/letsencrypt/live/babygamers.minecraftr.us/fullchain.pem", "utf8");
+const httpServer = http.createServer();
 
-var express = require('express');
-var app = express();
+const io = new Server(httpServer, {"path": "/socket.io/"});
+const PORT = 3000;
 
-// your express configuration here
-
-app.get("/", (req, res) => {
-    res.send("Hi");
-})
-
-var httpServer = http.createServer(app);
-var httpsServer = https.createServer({key: privateKey, cert: certificate}, app);
-
-httpServer.listen(80, () => {
-    console.log("http server up");
+io.of("/server").on("connection", (socket) => {
+    console.log("New connection to socket!", socket.id);
 });
-httpsServer.listen(443, () => {
-    console.log("https server up");
+
+setInterval(() => {
+    console.log("Emitting test message");
+    io.of("/server").emit("discordChatRelay", {
+        message: "Hi"
+    });
+}, 15000);
+
+httpServer.listen(PORT, () => {
+    console.log(`[Socket Test] Listening on port ${PORT}`);
 });

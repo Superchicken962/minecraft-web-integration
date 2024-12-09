@@ -11,6 +11,7 @@
     "http": "^0.0.1-security",
     "https": "^1.0.0",
     "mc-server-discord-bot": "file:",
+    "minecraft-plugin-integration": "file:",
     "node-fetch": "^2.6.9",
     "path": "^0.12.7",
     "socket.io": "^4.6.1"
@@ -25,7 +26,6 @@
   },
   "author": "superchicken962",
   "license": "ISC",
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Superchicken962/minecraft-web-integration.git"

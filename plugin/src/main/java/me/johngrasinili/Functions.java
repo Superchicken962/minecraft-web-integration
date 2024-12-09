@@ -47,6 +47,7 @@ public class Functions {
     HashMap<String, worldMapSettings> worldMapSettings = DataStorage.worldMapSettings;
     HashMap<UUID, List<taskToComplete>> awaitingTaskComplete = DataStorage.AwaitingTaskCompletion;
     HashMap<UUID, playerLocation> playerLastLocations = DataStorage.PlayerLastLocation;
+    public final SocketClient socket = DataStorage.ServerSocket;
 
     Team afkTeam = DataStorage.team_AFK;
     Team JaiGameTeam = DataStorage.team_JaiGame;
@@ -155,7 +156,7 @@ public class Functions {
 
         HashMap<String, String> values = new HashMap<String, String>();
     
-        values.put("log.content", logmessage); 
+        values.put("log.content", logmessage);
         Date date = new Date();
         values.put("eventTime", Long.toString(date.getTime()));
         values.put("token", "Y+ZdEW3ZiQVGOXaW4gjo2Ikl4SyeeshDFD6Kp2WlqmpoYMAawXSZX7G+Gz9nboBK"); 
@@ -526,6 +527,12 @@ public class Functions {
 
     public Boolean isUserInJaiGameTeam(String username) {
         return JaiGameTeam.getEntries().contains(username);
+    }
+
+    public void sendFakeChatMessage(String username, String content) {
+        String message = String.format("%s : %s", username, content);
+
+        Bukkit.getServer().broadcastMessage(message);
     }
 
     // ideas for more stuff:

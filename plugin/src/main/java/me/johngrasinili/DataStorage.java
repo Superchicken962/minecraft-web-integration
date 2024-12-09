@@ -1,5 +1,6 @@
 package me.johngrasinili;
 
+import io.socket.client.Socket;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -38,4 +39,6 @@ public class DataStorage {
 
     // hold the last location of a player (currently used for teleporting back to same spot from another world)
     public static final HashMap<UUID, playerLocation> PlayerLastLocation = new HashMap<UUID, playerLocation>();
+
+    public static final SocketClient ServerSocket = new SocketClient(3000); 
 }

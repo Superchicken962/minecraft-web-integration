@@ -1,7 +1,9 @@
 package me.johngrasinili;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import me.johngrasinili.commands.autoBridge;
 import me.johngrasinili.commands.clearProtectedBlocks;
 import me.johngrasinili.commands.jaiGame;
@@ -14,28 +16,23 @@ import me.johngrasinili.listeners.onBlockExplode;
 import me.johngrasinili.listeners.onBlockPhysChange;
 import me.johngrasinili.listeners.onChat;
 import me.johngrasinili.listeners.onEntityDamagedByEntity;
+import me.johngrasinili.listeners.onItemCrafted;
 import me.johngrasinili.listeners.onPlayerAdvancement;
 import me.johngrasinili.listeners.onPlayerChangedWorld;
 import me.johngrasinili.listeners.onPlayerDeath;
-// import me.johngrasinili.listeners.onPlayerDropItem;
-import me.johngrasinili.listeners.onItemCrafted;
 import me.johngrasinili.listeners.onPlayerJoin;
 import me.johngrasinili.listeners.onPlayerLeave;
 import me.johngrasinili.listeners.onPlayerMove;
 import me.johngrasinili.listeners.onPlayerRespawn;
 import me.johngrasinili.listeners.onServerLoad;
-
-import java.io.IOException;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class App extends JavaPlugin implements Listener {
 
@@ -77,6 +74,11 @@ public class App extends JavaPlugin implements Listener {
         Function.setGameModeForWorld("jaigame", GameMode.ADVENTURE); // set gamemode for players to be set as when loading in to world
 
         Function.addOnlinePlayersToScoreboard();
+
+        Function.socket.listen("discordChatRelay", (Object... args) -> {
+            getLogger().log(Level.INFO, "Receieved discordChatRelay: {0}", Arrays.toString(args));
+            // TODO: Handle this.
+        });
 
         Handler handler = new Handler() {
             
