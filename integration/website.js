@@ -6,6 +6,7 @@ const secret = require("./secret.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
+const { askSocket } = require("./functions");
 
 /** @type { Server } */
 let io;
@@ -15,12 +16,20 @@ exports.register = function(socketIo) {
 
     // Handle connection for server namespace.
     io.of("/server").on("connection", (socket) => {
-        console.log("new /server connection");
         const authorised = (socket.handshake.auth?.token === secret.socketAuthToken);
+        console.log("new /server connection", {authorised});
 
         if (!authorised) {
             socket.disconnect(true);
         }
+
+        socket.on("askServer:response", (data) => {
+            if (typeof askSocket.socketAwaitingResponse[data.id] === "function") {
+                askSocket.socketAwaitingResponse[data.id](data);
+            }
+
+            delete askSocket.socketAwaitingResponse[data.id];
+        });
     });
 }
 

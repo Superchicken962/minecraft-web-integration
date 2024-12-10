@@ -67,7 +67,7 @@ httpServer.listen(PORT, () => {
 
 client.on("ready", () => {
     console.log("[Discord] Bot is online!");
-    serverInfo.update(client);
+    serverInfo.update(client, io);
 });
 
 client.login(secret.token);

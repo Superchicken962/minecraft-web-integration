@@ -29,9 +29,11 @@ import org.bukkit.GameMode;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -101,6 +103,44 @@ public class App extends JavaPlugin implements Listener {
             if (!authToken.equals(socketToken)) return;
 
             Function.sendFakeChatMessage(username, message);
+        });
+
+
+        Function.socket.listen("askServer", (Object... args) -> {
+            try {
+                JSONObject response = (JSONObject) args[0];
+                
+                String eventName;
+                String id;
+
+                eventName = response.getString("event");
+                id = response.getString("id");
+
+                JSONObject dataToRespond = new JSONObject();
+
+                dataToRespond.put("id", id);
+
+                // TODO: Consider expanding this into a callback based system, where we can add events with a function rather than adding into a switch.
+
+                // Add different data depending on the event called.
+                switch(eventName) {
+                    // Find all online players and add to response data.
+                    case "getOnlinePlayers":
+                        JSONArray players = new JSONArray();
+                        
+                        for (Player player : Bukkit.getOnlinePlayers()) {
+                            players.put(player);
+                        }
+                        
+                        dataToRespond.put("onlinePlayers", players);
+                        break;
+                }
+
+                Function.socket.emit("askServer:response", dataToRespond);
+
+            } catch (JSONException ex) {
+                // Handle?
+            }
         });
 
         Handler handler = new Handler() {

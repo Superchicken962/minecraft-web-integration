@@ -1,39 +1,8 @@
 const { Client, Message, Colors } = require("discord.js");
-const gamedig = require("gamedig");
+const gameDig = require('gamedig');
 const fs = require("node:fs");
 const path = require("node:path");
-
-function isServerValid(game, ip, port) {
-    return new Promise((resolve, reject) => {
-        gamedig.query({
-            "host": ip,
-            "port": port,
-            "type": game
-        }).then(() => {
-            resolve(true, null);
-        }).catch((err) => {
-            resolve(false, err);
-        });
-    });
-}
-
-function formatServerData(status) {
-    const data = {
-        server_name: status.name,
-        server_map: status.map,
-        password_protected: status.password,
-        maxplayers: status.maxplayers,
-        ping: status.ping,
-        connect: status.connect,
-        players: status.players,
-        bots: status.bots,
-        playercount: status.players.length,
-        gamespecific: null,
-        game_code: "minecraft",
-        game: "Minecraft"
-    };
-    return data;
-}
+const { Server } = require("socket.io");
 
 const serverInfo = {
     readConfig: async function() {
@@ -62,10 +31,11 @@ const serverInfo = {
     /**
      * Update server information.
      * 
-     * @param { Client } client 
+     * @param { Client } client - Discord bot client.
+     * @param { Server } io - Socket io server.
      * @returns 
      */
-    update: async function(client) {
+    update: async function(client, io) {
         let cfg = await this.readConfig();
 
         if (!cfg.server?.ip || !cfg.server?.port) {
@@ -108,80 +78,68 @@ const serverInfo = {
             cfg.message.messageId = message.id;
         }
 
-        // Debug/Test edit.
+        await this.updateConfig(cfg);
+
+        /** @type { import("gamedig").QueryResult } */
+        let server;
+
+        try {
+            server = await gameDig.query({
+                "host": cfg.server.ip,
+                "port": cfg.server.port,
+                "type": "minecraft"
+            });
+        } catch (error) {
+            console.log("Server is offline");
+            return;
+        }
+
+        console.log(server);
+
+        const embedFields = [];
+
+        embedFields.push({
+            "name": "Players",
+            "value": `${server.players.length}/${server.maxplayers}`
+        });
+
+        if (server.players.length > 0) {
+            // Consider sending a socket request to plugin to request more information on players - ie. the time they have been on for.
+            // for (const player of server.players) {
+            //     embedFields.push({
+            //         "name": player.name,
+            //         "value": player.ping,
+            //         "inline": true
+            //     });
+            // }
+
+            askSocket.askServer(io.of("/server"), "getOnlinePlayers", (data) => {
+                console.log("!! Got online players", data);
+                for (const player of data.onlinePlayers) {
+                    
+                }
+            });
+        }
+
+        // Edit the message to include the server stats.
         message.edit({
-            "content": ".",
+            "content": "",
             "embeds": [
                 {
-                    "title": "Test",
+                    "title": (server.name || "A Minecraft Server"),
                     "footer": {
                         "text": `${cfg.server.ip}:${cfg.server.port}`
                     },
                     "color": Colors.Green,
-                    "timestamp": new Date().toISOString()
+                    "timestamp": new Date().toISOString(),
+                    "fields": embedFields
                 }
             ]
         });
 
-        await this.updateConfig(cfg);
-    
-        // gamedig.query({
-        //     "host": data.server.ip,
-        //     "port": data.server.port,
-        //     "type": data.server.game
-        // }).then((server) => {
-        //     var formatted_data = null;
-        //     if (data.server.game === "minecraft") {
-        //         formatted_data = formatMinecraftServerStats(server);
-        //     }
-    
-        //     const status_embed = new EmbedBuilder();
-            
-        //     status_embed.setTitle(formatted_data.server_name);
-        //     status_embed.setDescription(formatted_data.connect);
-        //     status_embed.setColor(Colors.Green);
-        //     status_embed.setFooter({text:formatted_data.game});
-        //     status_embed.setTimestamp();
-    
-        //     status_embed.addFields(
-        //         {name:"Players", value:formatted_data.playercount+"/"+formatted_data.maxplayers}
-        //     );
-                        
-        //     if (formatted_data.playercount > 0) {
-    
-        //         var players = [];
-    
-        //         formatted_data.players.forEach((player) => {
-        //             var playername = player.name
-        //             if (player.isBot) {
-        //                 playername = "[BOT] "+player.name;
-        //             }
-        //             players.push(playername);
-        //         });
-                
-        //         status_embed.addFields(
-        //             {name:"Name", value:players.join("\n").toString(), inline:true},
-        //         );
-        //     }
-    
-        //     message_to_edit.edit({content:"", embeds:[status_embed]});
-    
-        // }).catch((error) => {
-        //     console.log(error);
-        //     var offline_embed = new EmbedBuilder();
-        //     offline_embed.setTitle("Server Offline :(");
-        //     offline_embed.setColor(Colors.Red);
-        //     offline_embed.setTimestamp();
-    
-        //     message_to_edit.edit({content:"", embeds:[offline_embed]});
-        // });
-    
-        // setTimeout(() => {
-        //     updateServerInfo();
-        // }, 120000);
 
         setTimeout(() => {
-            this.update(client);
+            this.update(client, io);
         }, (cfg.settings?.serverUpdateInterval || 90)*1000);
     },
 
@@ -198,4 +156,41 @@ const serverInfo = {
     }
 }
 
-module.exports = { isServerValid, formatServerData, serverInfo };
+function randomCode(length = 6) {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGIJKLMOPQRSTUVWXYZ0123456789!#";
+    let code = "";
+
+    for (let i = 0; i < length; i++) {
+        const randomChar = chars[Math.floor(Math.random() * chars.length)];
+        code += randomChar;
+    }
+
+    return code;
+}
+
+const askSocket = {
+    socketAwaitingResponse: {},
+
+    /**
+     * 
+     * @param { Server } socket - Socket server.
+     * @param { String | Object } event - Event name or data.
+     * @param { (data: Object) => {} } callback - Callback function.
+     */
+    askServer: function(socket, event, callback) {
+        let data = {};
+    
+        if (typeof event === "object") {
+            data = event;
+        } else {
+            data.event = event;
+        }
+    
+        if (!data.id) data.id = randomCode(16);
+    
+        this.socketAwaitingResponse[data.id] = callback;
+        socket.emit("askServer", data);
+    }
+};
+
+module.exports = { serverInfo, askSocket };
