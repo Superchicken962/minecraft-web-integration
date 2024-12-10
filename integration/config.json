@@ -1,0 +1,13 @@
+{
+    "settings": {
+        "serverUpdateInterval": 90
+    },
+    "server": {
+        "ip": "159.13.48.200",
+        "port": "25565"
+    },
+    "message": {
+        "channelId": "1098579574218047580",
+        "messageId": "1098975661005209640"
+    }
+}

@@ -1,21 +1,31 @@
 const express = require("express");
 const app = express.Router();
+const fs = require("node:fs");
 const path = require("path");
-const io = require("./app").socketio;
-const session = require("express-session");
+const secret = require("./secret.json");
 
 const discord = require("./discordFunctions");
+const { Server } = require("socket.io");
 
-io.on("connection", (socket) => {
-    console.log("new connection");
-});
+/** @type { Server } */
+let io;
 
-const secret = {
-    "requestToken": "Y+ZdEW3ZiQVGOXaW4gjo2Ikl4SyeeshDFD6Kp2WlqmpoYMAawXSZX7G+Gz9nboBK"
-};
+exports.register = function(socketIo) {
+    io = socketIo;
+
+    // Handle connection for server namespace.
+    io.of("/server").on("connection", (socket) => {
+        console.log("new /server connection");
+        const authorised = (socket.handshake.auth?.token === secret.socketAuthToken);
+
+        if (!authorised) {
+            socket.disconnect(true);
+        }
+    });
+}
 
 app.get("/", (req, res) => {
-    res.render(path.join(__dirname, "public/index.html"), {});
+    res.render("index.html", {});
 });
 
 app.get("/logs", (req, res) => {
@@ -34,7 +44,7 @@ app.get("/logs", (req, res) => {
     }
 
     var pastlogs = (recentLogs.slice(-20)); // get last 15 logs in the array
-    res.render(path.join(__dirname, "public/logs.html"), {recentLogs: pastlogs, viewmode: viewmode, auth: auth});
+    res.render("logs.html", {recentLogs: pastlogs, viewmode: viewmode, auth: auth});
 });
 
 app.get("/mode/:mode", (req, res) => {
@@ -73,7 +83,7 @@ app.post("/api/post/log/:type", (req, res) => {
     var type = req.params.type;
     var token = req.body.token;
     var recievetime = new Date();
-    if (token !== secret.requestToken) {
+    if (token !== secret.socketAuthToken) {
         console.log("["+recievetime.toLocaleTimeString()+`] API Request Rejected! (Token doesn't match!) AT ${req.path}`);
         res.sendStatus(401);
         return;
@@ -243,7 +253,7 @@ app.post("/api/update/stats", (req, res) => {
 });
 
 app.get("/stats", (req, res) => {
-    res.render(path.join(__dirname, "public/stats.html"), {query: req.query});
+    res.render("stats.html", {query: req.query});
 });
 
 app.get("/get/stats", (req, res) => {
@@ -256,8 +266,31 @@ app.get("/get/statistic/:type", (req, res) => {
     res.send(findstat);
 });
 
-app.get("/css/main", (req, res) => {
-    res.sendFile(path.join(__dirname, "public/main.css"));
+app.get(["/js/*", "/css/*"], (req, res, next) => {    
+    let requestPath = req.path;
+
+    // Remove a trailing '/' if it is there.
+    if (requestPath.slice(-1) === "/") {
+        requestPath = requestPath.slice(0, -1);
+    }
+
+    let filePath = path.join(__dirname, "views/"+requestPath);
+
+    // If path is for a css file, but an extension is not given then we add the .css ourselves.
+    if (requestPath.startsWith("/css") && !filePath.endsWith(".css")) {
+        filePath += ".css";
+    }
+    // Do the same for JavaScript files.
+    if (requestPath.startsWith("/js") && !filePath.endsWith(".js")) {
+        filePath += ".js";
+    }
+
+    if (!fs.existsSync(filePath) || !filePath.endsWith(".css") && !filePath.endsWith(".js")) {
+        next();
+        return
+    }
+
+    res.sendFile(filePath);
 });
 
-module.exports = app;
+exports.router = app;

@@ -1,1 +1,2 @@
 socketAuthToken: unset
+socketPort: 3000

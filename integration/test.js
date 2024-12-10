@@ -4,16 +4,25 @@ const http = require("http");
 const httpServer = http.createServer();
 
 const io = new Server(httpServer, {"path": "/socket.io/"});
-const PORT = 3000;
+const PORT = 3003;
+
+const authToken = "y#67RX1PtVa8VNWt2u_3gVMoXy$PZ$_IYhUpulAQ6$u15NwWPk";
 
 io.of("/server").on("connection", (socket) => {
-    console.log("New connection to socket!", socket.id);
+    const authorised = (socket.handshake.auth?.token === authToken);
+
+    // Close unauthorised connections.
+    if (!authorised) {
+        socket.disconnect(true);
+    }
 });
 
 setInterval(() => {
     console.log("Emitting test message");
     io.of("/server").emit("discordChatRelay", {
-        message: "Hi"
+        username: "TestUsername",
+        message: "Hi from test code",
+        authToken
     });
 }, 15000);
 

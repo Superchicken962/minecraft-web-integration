@@ -3,14 +3,12 @@ package me.johngrasinili.listeners;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import me.johngrasinili.Functions;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-
-import me.johngrasinili.Functions;
-import net.md_5.bungee.api.ChatColor;
 
 public class onPlayerJoin implements Listener {
     @EventHandler

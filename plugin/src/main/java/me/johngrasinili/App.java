@@ -79,15 +79,17 @@ public class App extends JavaPlugin implements Listener {
         Function.addOnlinePlayersToScoreboard();
 
         // Add the auth token from the config to the socket.
-        Function.socket.setAuthToken(this.getConfig().getString("socketAuthToken"));
+        Function.socket.setAuthToken(this.getConfig().getString("socketAuthToken", ""));
 
         Function.socket.listen("discordChatRelay", (Object... args) -> {
             JSONObject response = (JSONObject) args[0];
 
+            String username;
             String message;
             String authToken;
 
             try {
+                username = response.getString("username");
                 message = response.getString("message");
                 authToken = response.getString("authToken");
             } catch (JSONException ex) {
@@ -98,7 +100,7 @@ public class App extends JavaPlugin implements Listener {
             String socketToken = this.getConfig().getString("socketAuthToken");
             if (!authToken.equals(socketToken)) return;
 
-            Function.sendFakeChatMessage("Mr. Venom", message);
+            Function.sendFakeChatMessage(username, message);
         });
 
         Handler handler = new Handler() {

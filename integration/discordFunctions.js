@@ -1,6 +1,5 @@
 const { Colors } = require("discord.js");
 const fetch = require("node-fetch");
-const { param } = require("./website");
 
 function sendToLogsChannel(type, log) {
     var webhookURL = require("./config.json").webhookURL;
