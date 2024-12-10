@@ -1,7 +1,8 @@
 package me.johngrasinili.listeners;
 
 import java.util.UUID;
-
+import me.johngrasinili.Functions;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -10,9 +11,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
-
-import me.johngrasinili.Functions;
-import net.md_5.bungee.api.ChatColor;
 
 public class onPlayerMove implements Listener {
     Functions Function = new Functions();

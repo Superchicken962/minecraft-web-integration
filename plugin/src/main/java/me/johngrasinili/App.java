@@ -1,6 +1,5 @@
 package me.johngrasinili;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -33,6 +32,8 @@ import org.bukkit.WorldCreator;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class App extends JavaPlugin implements Listener {
 
@@ -67,6 +68,8 @@ public class App extends JavaPlugin implements Listener {
         getCommand("afk").setExecutor(new toggleAFK());
         getCommand("jaigame").setExecutor(new jaiGame());
 
+        this.saveDefaultConfig();
+
         Functions Function = new Functions();
 
         World JaiGameWorld = Bukkit.createWorld(new WorldCreator("jaigame")); // create the jaigame world
@@ -75,9 +78,27 @@ public class App extends JavaPlugin implements Listener {
 
         Function.addOnlinePlayersToScoreboard();
 
+        // Add the auth token from the config to the socket.
+        Function.socket.setAuthToken(this.getConfig().getString("socketAuthToken"));
+
         Function.socket.listen("discordChatRelay", (Object... args) -> {
-            getLogger().log(Level.INFO, "Receieved discordChatRelay: {0}", Arrays.toString(args));
-            // TODO: Handle this.
+            JSONObject response = (JSONObject) args[0];
+
+            String message;
+            String authToken;
+
+            try {
+                message = response.getString("message");
+                authToken = response.getString("authToken");
+            } catch (JSONException ex) {
+                return;
+            }
+
+            // Check the given token against the token in the config.
+            String socketToken = this.getConfig().getString("socketAuthToken");
+            if (!authToken.equals(socketToken)) return;
+
+            Function.sendFakeChatMessage("Mr. Venom", message);
         });
 
         Handler handler = new Handler() {

@@ -146,10 +146,15 @@ public class Functions {
         }
     }
 
-    public void clearPlayerFromStorage(UUID uuid) {
-        afkPlayers.remove(uuid);
-        protectedBlockMode.remove(uuid);
-        autoBridge.remove(uuid);
+    public void clearPlayerFromStorage(Player player) {
+        // Make sure to actually disable AFK mode.
+        disableAFK(player);
+
+        UUID id = player.getUniqueId();
+
+        afkPlayers.remove(id);
+        protectedBlockMode.remove(id);
+        autoBridge.remove(id);
     }
 
     public void sendLogsToServer(String logmessage) throws IOException, InterruptedException {
@@ -530,7 +535,7 @@ public class Functions {
     }
 
     public void sendFakeChatMessage(String username, String content) {
-        String message = String.format("%s : %s", username, content);
+        String message = String.format("<%s> %s", username, content);
 
         Bukkit.getServer().broadcastMessage(message);
     }
