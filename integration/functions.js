@@ -103,22 +103,69 @@ const serverInfo = {
             "value": `${server.players.length}/${server.maxplayers}`
         });
 
-        if (server.players.length > 0) {
-            // Consider sending a socket request to plugin to request more information on players - ie. the time they have been on for.
-            // for (const player of server.players) {
-            //     embedFields.push({
-            //         "name": player.name,
-            //         "value": player.ping,
-            //         "inline": true
-            //     });
-            // }
+        // Store player fields here because it needs to be "clearable" when server responds with data.
+        const embedPlayerFields = [];
 
-            askSocket.askServer(io.of("/server"), "getOnlinePlayers", (data) => {
-                console.log("!! Got online players", data);
-                for (const player of data.onlinePlayers) {
-                    
-                }
+        if (server.players.length > 0) {
+            const playerNames = server.players.map(player => player.name).join("\n");
+
+            embedPlayerFields.push({
+                "name": "Name",
+                "value": playerNames,
+                "inline": true
+            }, {
+                "name": "Ping",
+                "value": "N/A",
+                "inline": true
+            }, {
+                "name": "Time",
+                "value": "N/A",
+                "inline": true
             });
+
+            // Wait for socket response before editing message.
+            await new Promise((resolve) => {
+    
+                askSocket.askServer(io.of("/server"), "getOnlinePlayers", (data) => {
+                    console.log("!! Got online players", data);
+                    embedPlayerFields.length = 0;
+
+                    const playerNames = [];
+                    const playerTimes = [];
+                    const playerPing = [];
+    
+                    for (const player of data.onlinePlayers) {
+                        playerNames.push(player.username);
+                        playerTimes.push(formatPlayTime(player.time));
+                        playerPing.push(player.ping);
+                    }
+
+                    embedPlayerFields.push(
+                    {
+                        "name": "Username",
+                        "value": playerNames.join("\n"),
+                        "inline": true
+                    },
+                    {
+                        "name": "Time",
+                        "value": playerTimes.join("\n"),
+                        "inline": true
+                    },
+                    {
+                        "name": "Ping",
+                        "value": playerPing.join("\n"),
+                        "inline": true
+                    });
+
+                    resolve();
+                }, () => {
+                    console.log("No response from server - falling back to queried player data.");
+                    resolve();
+                }, 8);
+            });
+
+            // Transfer player fields to regular fields array.
+            embedPlayerFields.forEach(field => embedFields.push(field))
         }
 
         // Edit the message to include the server stats.
@@ -176,8 +223,10 @@ const askSocket = {
      * @param { Server } socket - Socket server.
      * @param { String | Object } event - Event name or data.
      * @param { (data: Object) => {} } callback - Callback function.
+     * @param { () => {} } timeout - Timeout function (function to call when/if response times out).
+     * @param { Number } timeoutAfter - Seconds until response times out after sending.
      */
-    askServer: function(socket, event, callback) {
+    askServer: function(socket, event, callback, timeout, timeoutAfter = 90) {
         let data = {};
     
         if (typeof event === "object") {
@@ -188,9 +237,40 @@ const askSocket = {
     
         if (!data.id) data.id = randomCode(16);
     
-        this.socketAwaitingResponse[data.id] = callback;
+        this.socketAwaitingResponse[data.id] = {
+            callback
+        }
+
+        if (typeof timeout === "function") {
+            this.socketAwaitingResponse[data.id].timeout = setTimeout(timeout, timeoutAfter*1000);
+        }
+
         socket.emit("askServer", data);
     }
 };
 
-module.exports = { serverInfo, askSocket };
+/**
+ * Formats play time into string.
+ * 
+ * @param { Number } time - Play time in miliseconds.
+ * @returns { String } Formatted time string.
+ */
+function formatPlayTime(time) {
+    const seconds = Math.floor(time/1000);
+    const minutes = Math.floor(time/1000/60);
+    const hours = Math.floor(time/1000/60/60);
+
+    let timeStr = `${seconds}s`;
+
+    if (seconds >= 60) {
+        timeStr = `${minutes%60}m ${seconds%60}s`;
+    }
+
+    if (minutes >= 60) {
+        timeStr = `${hours}h ${minutes%60}m`;
+    }
+
+    return timeStr;
+}
+
+module.exports = { serverInfo, askSocket, formatPlayTime };

@@ -9,7 +9,6 @@ import me.johngrasinili.commands.jaiGame;
 import me.johngrasinili.commands.protectBlocks;
 import me.johngrasinili.commands.test;
 import me.johngrasinili.commands.toggleAFK;
-import me.johngrasinili.commands.updateStats;
 import me.johngrasinili.listeners.onBlockBreak;
 import me.johngrasinili.listeners.onBlockExplode;
 import me.johngrasinili.listeners.onBlockPhysChange;
@@ -27,6 +26,8 @@ import me.johngrasinili.listeners.onServerLoad;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.GameRule;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
@@ -66,7 +67,6 @@ public class App extends JavaPlugin implements Listener {
         getCommand("clearProtectedBlocks").setExecutor(new clearProtectedBlocks());
         getCommand("autoBridge").setExecutor(new autoBridge());
         getCommand("test").setExecutor(new test());
-        getCommand("updateStats").setExecutor(new updateStats());
         getCommand("afk").setExecutor(new toggleAFK());
         getCommand("jaigame").setExecutor(new jaiGame());
 
@@ -129,19 +129,44 @@ public class App extends JavaPlugin implements Listener {
                         JSONArray players = new JSONArray();
                         
                         for (Player player : Bukkit.getOnlinePlayers()) {
-                            players.put(player);
+                            JSONObject playerInfo = new JSONObject();
+                            
+                            playerInfo.put("username", player.getName());
+                            playerInfo.put("time", Function.getPlayerSessionTime(player.getUniqueId()));
+                            playerInfo.put("ping", player.getPing());
+
+                            players.put(playerInfo);
                         }
                         
                         dataToRespond.put("onlinePlayers", players);
+                        break;
+
+                    case "getPlayerStats":
+                        JSONObject allPlayers = new JSONObject();
+
+                        // Loop through offline players and get values for all stats.
+                        for (OfflinePlayer player : Bukkit.getServer().getOfflinePlayers()) {
+                            JSONObject playerStats = new JSONObject();
+
+                            // Loop through statistics and add to player object.
+                            for (Statistic stat : Statistic.values()) {
+                                playerStats.put(stat.toString(), player.getStatistic(stat));
+                            }
+
+                            allPlayers.put(player.getUniqueId().toString(), playerStats);
+                        }
+
+                        dataToRespond.put("allPlayers", allPlayers);
                         break;
                 }
 
                 Function.socket.emit("askServer:response", dataToRespond);
 
             } catch (JSONException ex) {
-                // Handle?
+                Bukkit.getLogger().log(Level.INFO, "Error receiving socket message: {0}", ex);
             }
         });
+
 
         Handler handler = new Handler() {
             

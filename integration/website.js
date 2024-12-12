@@ -21,11 +21,17 @@ exports.register = function(socketIo) {
 
         if (!authorised) {
             socket.disconnect(true);
+            return;
         }
 
         socket.on("askServer:response", (data) => {
-            if (typeof askSocket.socketAwaitingResponse[data.id] === "function") {
-                askSocket.socketAwaitingResponse[data.id](data);
+            // Check if id is awaiting response and if callback is provided.
+            if (askSocket.socketAwaitingResponse[data.id] && typeof askSocket.socketAwaitingResponse[data.id].callback === "function") {
+                askSocket.socketAwaitingResponse[data.id].callback(data);
+
+                // Clear timeout if it exists so it is not thrown.
+                const responseTimeout = askSocket.socketAwaitingResponse[data.id].timeout;
+                if (responseTimeout) clearTimeout(responseTimeout);
             }
 
             delete askSocket.socketAwaitingResponse[data.id];
@@ -247,21 +253,13 @@ app.post("/api/post/action", (req, res) =>  {
 
 var stats = {};
 
-app.post("/api/update/stats", (req, res) => {
-    var token = req.body.token;
-    var recievetime = new Date();
-    if (token !== secret.requestToken) {
-        console.log("["+recievetime.toLocaleTimeString()+`] API Request Rejected! (Token doesn't match!) AT ${req.path}`);
-        res.sendStatus(401);
-        return;
-    }
-
-    res.sendStatus(200); // acknowledge
-    console.log(req.body);
-    stats = req.body.statistics;
-});
-
 app.get("/stats", (req, res) => {
+    askSocket.askServer(io.of("/server"), "getPlayerStats", (data) => {
+        console.log("getPlayerStats", data);
+    }, () => {
+        console.log("timed out");
+    });
+
     res.render("stats.html", {query: req.query});
 });
 

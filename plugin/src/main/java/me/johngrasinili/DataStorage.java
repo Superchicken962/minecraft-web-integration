@@ -41,4 +41,6 @@ public class DataStorage {
 
     // Get the plugin using the plugin name.
     public static final SocketClient ServerSocket = new SocketClient(Bukkit.getPluginManager().getPlugin("baby-gamers-mc-plugin").getConfig().getInt("socketPort", 3000));
+
+    public static final HashMap<UUID, Long> PlayerJoinTime = new HashMap<>();
 }

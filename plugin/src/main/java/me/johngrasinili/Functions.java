@@ -16,10 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Statistic;
 import org.bukkit.World;
-import org.bukkit.Statistic.Type;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
@@ -27,8 +24,6 @@ import org.bukkit.scoreboard.Team;
 import org.bukkit.scoreboard.Team.Option;
 import org.bukkit.scoreboard.Team.OptionStatus;
 
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -48,6 +43,7 @@ public class Functions {
     HashMap<UUID, List<taskToComplete>> awaitingTaskComplete = DataStorage.AwaitingTaskCompletion;
     HashMap<UUID, playerLocation> playerLastLocations = DataStorage.PlayerLastLocation;
     public final SocketClient socket = DataStorage.ServerSocket;
+    HashMap<UUID, Long> playerJoinTime = DataStorage.PlayerJoinTime;
 
     Team afkTeam = DataStorage.team_AFK;
     Team JaiGameTeam = DataStorage.team_JaiGame;
@@ -146,6 +142,7 @@ public class Functions {
         }
     }
 
+    // Remove the player from all storage/hashmaps - mainly for player leaving.
     public void clearPlayerFromStorage(Player player) {
         // Make sure to actually disable AFK mode.
         disableAFK(player);
@@ -155,6 +152,7 @@ public class Functions {
         afkPlayers.remove(id);
         protectedBlockMode.remove(id);
         autoBridge.remove(id);
+        playerJoinTime.remove(id);
     }
 
     public void sendLogsToServer(String logmessage) throws IOException, InterruptedException {
@@ -291,96 +289,6 @@ public class Functions {
             .build();
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-    }
-
-    public void updateStatistics() throws JsonProcessingException {
-        HashMap<String, Object> values = new HashMap<String, Object>();
-        
-        List<world_stats> statistics = new ArrayList<world_stats>();
-
-        for (Statistic stat : Statistic.values()) { // for each statistic
-
-            if (stat.getType() != Type.UNTYPED) continue;
-
-            List<player_stat> players = new ArrayList<player_stat>();
-
-            OfflinePlayer[] offlineplayers = Bukkit.getOfflinePlayers();
-            for (OfflinePlayer player : offlineplayers) { // iterate through offlineplayers array
-                int playerstat = player.getStatistic(stat);
-                String username = player.getName();
-                UUID uuid = player.getUniqueId();
-
-                player_stat playerobj = new player_stat(username, uuid, Integer.toString(playerstat));
-                players.add(playerobj);
-            }
-
-            world_stats stats = new world_stats(stat.toString(), players);
-            statistics.add(stats);
-        }
-
-        Date date = new Date();
-        String time = Long.toString(date.getTime());
-        String token = "Y+ZdEW3ZiQVGOXaW4gjo2Ikl4SyeeshDFD6Kp2WlqmpoYMAawXSZX7G+Gz9nboBK";
-
-        values.put("updateTime", time);
-        values.put("token", token);
-        values.put("statistics", statistics);
-        
-        ObjectMapper objectmapper = new ObjectMapper();
-        objectmapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-        String reqBody = objectmapper.writeValueAsString(values);
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("http://127.0.0.1:80/api/update/stats"))
-            .setHeader("Content-Type", "application/json")
-            .version(HttpClient.Version.HTTP_1_1)
-            .POST(HttpRequest.BodyPublishers.ofString(reqBody))
-            .build();
-
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-    }
-
-    public class world_stats {
-        private String statname;
-        private List<player_stat> players;
-
-        public world_stats(String statname, List<player_stat> players) {
-            this.statname = statname;
-            this.players = players;
-        }
-
-        public String getStatname() {
-            return statname;
-        }
-
-        public List<player_stat> getPlayers() {
-            return players;
-        }
-    }
-
-    public class player_stat {
-        private String username;
-        private UUID uuid;
-        private String value;
-
-        public player_stat(String username, UUID uuid, String value) {
-            this.username = username;
-            this.uuid = uuid;
-            this.value = value;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public UUID getUUID() {
-            return uuid;
-        }
-
-        public String getValue() {
-            return value;
-        }
     }
 
     public void sendAdvancementLog(String playerName, int playerPing, InetSocketAddress playerIp, Boolean playerIsOperator, URI playerSkinUrl, String AdvancementName, String AdvancementDesc, String AdvancementIconItem) throws IOException, InterruptedException {
@@ -538,6 +446,27 @@ public class Functions {
         String message = String.format("<%s> %s", username, content);
 
         Bukkit.getServer().broadcastMessage(message);
+    }
+
+    public void setPlayerJoinTime(UUID playerId) {
+        playerJoinTime.put(playerId, System.currentTimeMillis());
+    }
+
+    public void deletePlayerJoinTime(UUID playerId) {
+        playerJoinTime.remove(playerId);
+    }
+
+    // Get the different between time from join and now.
+    public Long getPlayerSessionTime(UUID playerId) {
+        Long nowTime = System.currentTimeMillis();
+        Long storedTime = playerJoinTime.get(playerId);
+
+        if (storedTime == null) {
+            return 0L;
+        }
+
+        Long difference = nowTime - storedTime;
+        return difference;
     }
 
     // ideas for more stuff:

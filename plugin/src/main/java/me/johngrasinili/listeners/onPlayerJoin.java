@@ -27,6 +27,8 @@ public class onPlayerJoin implements Listener {
         URI senderSkinUrl = player.getPlayerProfile().getTextures().getSkin().toURI();
 
         Function.sendLogsToServer(player.getName(), player.getPing(), player.getAddress(), player.isOp(), senderSkinUrl, "join", "%p joined the game");
-        
+
+        // Set player join time - sets it as current time in ms.
+        Function.setPlayerJoinTime(player.getUniqueId());
     }
 }
