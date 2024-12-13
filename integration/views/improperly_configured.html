@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Improper Configuration!</title>
+    <title>Project Setup</title>
     <link rel="stylesheet" href="/css/main"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <div class="misconfigurationMenu">
-        <h1>App Improperly Configured!</h1>
+        <h1>Project Setup</h1>
         <p>
-            Some important settings may be missing, be sure to check the summary below and make according changes for the website to work!
+            Check the summary below to see any missing or invalid options to make according changes for the website to work!
             <br>Sections marked with an 'x' indicate that an entry is missing or invalid, while a tick indicates it is fine.
         </p>
 
@@ -37,7 +37,7 @@
                     Data in secret.json
                     
                     <%# Show a tick if every field is valid, otherwise show a cross. %>
-                    <% if (Object.entries(configurations.secretFile.fields).every(f => f === true)) { %>
+                    <% if (Object.values(configurations.secretFile.fields).every(f => f === true)) { %>
                         <span class="statusMark good"><i class="fa fa-check"></i></span>
                     <% } else { %>
                         <span class="statusMark bad"><i class="fa fa-xmark"></i></span>

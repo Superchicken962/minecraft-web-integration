@@ -3,6 +3,8 @@ const gameDig = require('gamedig');
 const fs = require("node:fs");
 const path = require("node:path");
 const { Server } = require("socket.io");
+const config = require("./config.json");
+const { default: axios } = require("axios");
 
 const serverInfo = {
     readConfig: async function() {
@@ -305,7 +307,7 @@ function getAllValuesInObj(obj) {
 function getRequiredSecretConfigFields() {
     return {
         "clientId": "Discord application client id",
-        "clientSecret": "Discord applciation client secret",
+        "clientSecret": "Discord application client secret",
         "guildId": "Id of Discord server to use",
         "token": "Discord bot token",
         "webhookURL": "Discord webhook to send logs to",
@@ -357,4 +359,62 @@ async function validateConfigurations() {
     return {configurations, isValid};
 }
 
-module.exports = { serverInfo, askSocket, formatPlayTime, validateConfigurations, getRequiredSecretConfigFields };
+/**
+ * Gets the url from config.json - additional
+ */
+function getBaseUrl() {
+    return config.settings?.url?.endsWith("/") ? config.settings.url.slice(0, -1) : config.settings?.url;
+}
+
+const discordAuth = {
+    /**
+     * Sends an authentication request to discord to login.
+     * 
+     * @param { String } clientId - Discord client id
+     * @param { String } clientSecret - Discord client secret
+     * @param { String } redirectUrl - Url to redirect to (must match discord)
+     * @param { String } code - Code returned from discord
+     * @returns { Promise<axios.AxiosResponse> } Response from Discord
+     */
+    authenticate: async function(clientId, clientSecret, redirectUrl, code) {
+        return await axios.post("https://discord.com/api/oauth2/token",
+            new URLSearchParams({
+                "client_id": clientId,
+                "client_secret": clientSecret,
+                "grant_type": "authorization_code",
+                "redirect_uri": redirectUrl,
+                "code": code
+            }).toString(),
+            {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            }
+        );
+    },
+
+    /**
+     * Fetch logged in user discord info.
+     * 
+     * @param {*} tokenType - Token type from authentication.
+     * @param {*} accessToken - Access token from authentication.
+     * @returns { Promise<axios.AxiosResponse> } Response from Discord.
+     */
+    getInfo: async function(tokenType, accessToken) {
+        return await axios.get("https://discord.com/api/users/@me", {
+            "headers": {
+                "authorization": `${tokenType} ${accessToken}`
+            }
+        });
+    }
+};
+
+module.exports = {
+    serverInfo,
+    askSocket,
+    formatPlayTime,
+    validateConfigurations,
+    getRequiredSecretConfigFields,
+    getBaseUrl,
+    discordAuth
+};

@@ -30,7 +30,7 @@ app.set("view-engine", "html");
 app.set("views", path.join(__dirname, "/views"));
 
 app.use(session({
-    secret: "smxNAjxlCmepWPSQiSjTuX",
+    secret: "sajxnhsamqsnbWH!!82sIlkjamXNsj#@",
     resave: false,
     saveUninitialized: false,
 }));

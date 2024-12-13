@@ -6,7 +6,7 @@ const secret = require("./secret.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, isProperlyConfigured, validateConfigurations, getRequiredSecretConfigFields } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields } = require("./functions");
 
 /** @type { Server } */
 let io;
@@ -75,6 +75,22 @@ app.use("*", async(req, res, next) => {
     }
 
     next();
+});
+
+app.use("/login", require("./auth"));
+
+app.get("/setup", async(req, res) => {
+    const configurations = await validateConfigurations();
+    res.render("improperly_configured.html", {configurations: configurations.configurations, fieldDescriptions: getRequiredSecretConfigFields()});
+});
+
+app.get("*", (req, res, next) => {
+    if (req.session.isLoggedIn) {
+        next();
+        return;
+    }
+
+    res.redirect("/login");
 });
 
 app.get("/", (req, res) => {
@@ -294,7 +310,7 @@ app.get("/stats", (req, res) => {
         console.log("getPlayerStats", data);
     }, () => {
         console.log("timed out");
-    });
+    }, 5);
 
     res.render("stats.html", {query: req.query});
 });

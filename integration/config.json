@@ -1,9 +1,10 @@
 {
     "settings": {
-        "serverUpdateInterval": 90
+        "serverUpdateInterval": 90,
+        "url": "http://127.0.0.1:3003/"
     },
     "server": {
-        "ip": "159.13.48.200",
+        "ip": "127.0.0.1",
         "port": "25565"
     },
     "message": {
