@@ -6,7 +6,7 @@ const secret = require("./secret.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket } = require("./functions");
+const { askSocket, isProperlyConfigured, validateConfigurations, getRequiredSecretConfigFields } = require("./functions");
 
 /** @type { Server } */
 let io;
@@ -39,13 +39,49 @@ exports.register = function(socketIo) {
     });
 }
 
+app.get(["/js/*", "/css/*"], (req, res, next) => {    
+    let requestPath = req.path;
+
+    // Remove a trailing '/' if it is there.
+    if (requestPath.slice(-1) === "/") {
+        requestPath = requestPath.slice(0, -1);
+    }
+
+    let filePath = path.join(__dirname, "views/"+requestPath);
+
+    // If path is for a css file, but an extension is not given then we add the .css ourselves.
+    if (requestPath.startsWith("/css") && !filePath.endsWith(".css")) {
+        filePath += ".css";
+    }
+    // Do the same for JavaScript files.
+    if (requestPath.startsWith("/js") && !filePath.endsWith(".js")) {
+        filePath += ".js";
+    }
+
+    if (!fs.existsSync(filePath) || !filePath.endsWith(".css") && !filePath.endsWith(".js")) {
+        next();
+        return
+    }
+
+    res.sendFile(filePath);
+});
+
+app.use("*", async(req, res, next) => {
+    const configurations = await validateConfigurations();
+
+    if (!configurations.isValid) {
+        res.render("improperly_configured.html", {configurations: configurations.configurations, fieldDescriptions: getRequiredSecretConfigFields()});
+        return;
+    }
+
+    next();
+});
+
 app.get("/", (req, res) => {
     res.render("index.html", {});
 });
 
 app.get("/logs", (req, res) => {
-
-    console.log(req.session);
 
     var viewmode = null;
     var auth = null;
@@ -271,33 +307,6 @@ app.get("/get/statistic/:type", (req, res) => {
     var sname = req.params.type.toUpperCase();
     var findstat = stats.filter(stat => stat.statname === sname);
     res.send(findstat);
-});
-
-app.get(["/js/*", "/css/*"], (req, res, next) => {    
-    let requestPath = req.path;
-
-    // Remove a trailing '/' if it is there.
-    if (requestPath.slice(-1) === "/") {
-        requestPath = requestPath.slice(0, -1);
-    }
-
-    let filePath = path.join(__dirname, "views/"+requestPath);
-
-    // If path is for a css file, but an extension is not given then we add the .css ourselves.
-    if (requestPath.startsWith("/css") && !filePath.endsWith(".css")) {
-        filePath += ".css";
-    }
-    // Do the same for JavaScript files.
-    if (requestPath.startsWith("/js") && !filePath.endsWith(".js")) {
-        filePath += ".js";
-    }
-
-    if (!fs.existsSync(filePath) || !filePath.endsWith(".css") && !filePath.endsWith(".js")) {
-        next();
-        return
-    }
-
-    res.sendFile(filePath);
 });
 
 exports.router = app;

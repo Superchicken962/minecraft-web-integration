@@ -273,4 +273,88 @@ function formatPlayTime(time) {
     return timeStr;
 }
 
-module.exports = { serverInfo, askSocket, formatPlayTime };
+/**
+ * Gets all shallow and deep values from an object and returns as an array..
+ * 
+ * @param { Object } obj - Object to search through.
+ * @returns { any[] } List of values.
+ */
+function getAllValuesInObj(obj) {
+    const values = [];
+
+    const checkValues = (object) => {
+        for (const value of Object.values(object)) {
+            if (typeof value === "object") {
+                checkValues(value);
+            } else {
+                values.push(value);
+            }
+        }
+    };
+
+    checkValues(obj);
+
+    return values;
+}
+
+/**
+ * Get a key value pair of fields that are required in secret.json for the app to work. Key is field name, and value is a short description.
+ * 
+ * @returns { Object }
+ */
+function getRequiredSecretConfigFields() {
+    return {
+        "clientId": "Discord application client id",
+        "clientSecret": "Discord applciation client secret",
+        "guildId": "Id of Discord server to use",
+        "token": "Discord bot token",
+        "webhookURL": "Discord webhook to send logs to",
+        "socketAuthToken": "Authentication token for socket - must match token given in plugin (config.yml)"
+    };
+}
+
+/**
+ * Validates all possible configurations and returns array of valid/invalid options.
+ * 
+ * @returns { {configurations: Object, isValid: Boolean} } Object of configuration options.
+ */
+async function validateConfigurations() {
+    const configurations = {
+        "secretFile": {
+            "exists": false,
+            "valid": false,
+            "fields": {}
+        }
+    }
+
+    const secretFilePath = path.join(__dirname, "secret.json");
+
+    if (!fs.existsSync(secretFilePath)) {
+        return configurations;
+    }
+
+    configurations.secretFile.exists = true;
+
+    let secrets = await fs.promises.readFile(secretFilePath, "utf-8");
+
+    try {
+        secrets = JSON.parse(secrets);
+    } catch (error) {
+        return configurations;
+    }
+
+    configurations.secretFile.valid = true;
+
+    const requiredFields = Object.keys(getRequiredSecretConfigFields());
+
+    // Check if secrets file contains field, and if so then set it to true in configuration validation check.
+    for (const field of requiredFields) {
+        configurations.secretFile.fields[field] = !!secrets[field];
+    }
+    
+    const isValid = getAllValuesInObj(configurations).every(conf => conf === true);
+
+    return {configurations, isValid};
+}
+
+module.exports = { serverInfo, askSocket, formatPlayTime, validateConfigurations, getRequiredSecretConfigFields };

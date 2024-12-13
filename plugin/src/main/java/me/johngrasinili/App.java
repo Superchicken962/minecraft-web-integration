@@ -150,7 +150,10 @@ public class App extends JavaPlugin implements Listener {
 
                             // Loop through statistics and add to player object.
                             for (Statistic stat : Statistic.values()) {
-                                playerStats.put(stat.toString(), player.getStatistic(stat));
+                                // Get statistic if it is not a substatistic.
+                                if (!stat.isSubstatistic()) {
+                                    playerStats.put(stat.toString(), player.getStatistic(stat));
+                                }
                             }
 
                             allPlayers.put(player.getUniqueId().toString(), playerStats);
