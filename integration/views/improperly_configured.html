@@ -17,8 +17,6 @@
 
         <div class="options">
 
-            <% console.log(configurations); %>
-
             <div class="option">
                 <h2 class="label">
                     Create secret.json
@@ -29,7 +27,6 @@
                         <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
                     <% } %>
                 </h2>
-                
             </div>
 
             <div class="option">
@@ -49,14 +46,50 @@
 
                 <% for (const [field, valid] of fields) { %>
                     <p class="label">
-                        <%console.log(fieldDescriptions)%>
-                        <% const desc = fieldDescriptions[field] %>
+                        <% const desc = fieldDescriptions.secret[field] %>
 
                         <%= field%> <span class="description"><%= desc ? `- ${desc}` : '' %></span>
                         <span class="statusMark <%= valid ? 'good' : 'bad' %>"><i class="fa fa-<%= valid ? 'check' : 'xmark' %>"></i></span>
                     </p>
                 <% } %>
             </div>
+
+            <div class="option">
+                <h2 class="label">
+                    Create config.json
+
+                    <% if (configurations.configFile.exists && configurations.configFile.valid) { %>
+                        <span class="statusMark good"><i class="fa fa-check"></i></span>
+                    <% } else { %>
+                        <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
+                    <% } %>
+                </h2>
+            </div>
+
+            <div class="option">
+                <h2 class="label">
+                    Data in config.json
+
+                    <%# Show a tick if every field is valid, otherwise show a cross. %>
+                    <% if (Object.values(configurations.configFile.fields).every(f => f === true)) { %>
+                        <span class="statusMark good"><i class="fa fa-check"></i></span>
+                    <% } else { %>
+                        <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
+                    <% } %>
+                </h2>
+
+                <% const configFields = (hideValidFields) ? Object.entries(configurations.configFile.fields).filter(s => !s[1]) : Object.entries(configurations.configFile.fields); %>
+
+                <% for (const [field, valid] of configFields) { %>
+                    <p class="label">
+                        <% const desc = fieldDescriptions.config[field] %>
+
+                        <%= field%> <span class="description"><%= desc ? `- ${desc}` : '' %></span>
+                        <span class="statusMark <%= valid ? 'good' : 'bad' %>"><i class="fa fa-<%= valid ? 'check' : 'xmark' %>"></i></span>
+                    </p>
+                <% } %>
+            </div>
+
         </div>
 
         <p>You may need to restart the website for some changes to be recognised/take affect.</p>

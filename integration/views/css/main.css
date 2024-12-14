@@ -1,3 +1,8 @@
+:root {
+    --discord_blurple: #5865F2;
+    --discord_blurple_2: rgb(114, 137, 218);
+}
+
 body {
     background-color: rgb(55,55,55);
     color: white;
@@ -121,3 +126,32 @@ a {
 }
 .misconfigurationMenu .options .option .statusMark.good { background-color: rgb(0,180,0); }
 .misconfigurationMenu .options .option .statusMark.bad { background-color: rgb(180,0,0); }
+
+.loginRequired {
+    display: block;
+    margin: auto;
+    width: fit-content;
+}
+
+.btn {
+    display: block;
+    margin: auto;
+    width: fit-content;
+    height: fit-content;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 18px;
+    --colour: rgb(33, 134, 230);
+    background-color: var(--colour);
+}
+.btn:hover {
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--colour);
+}
+.btn i {
+    vertical-align: bottom;
+}
+
+.discordLogin.btn {
+    --colour: var(--discord_blurple_2);
+}

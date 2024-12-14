@@ -3,10 +3,11 @@ const app = express.Router();
 const fs = require("node:fs");
 const path = require("path");
 const secret = require("./secret.json");
+const config = require("./config.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields } = require("./functions");
 
 /** @type { Server } */
 let io;
@@ -70,7 +71,7 @@ app.use("*", async(req, res, next) => {
     const configurations = await validateConfigurations();
 
     if (!configurations.isValid) {
-        res.render("improperly_configured.html", {configurations: configurations.configurations, fieldDescriptions: getRequiredSecretConfigFields()});
+        renderSetupPage(req, res, configurations);
         return;
     }
 
@@ -81,16 +82,28 @@ app.use("/login", require("./auth"));
 
 app.get("/setup", async(req, res) => {
     const configurations = await validateConfigurations();
-    res.render("improperly_configured.html", {configurations: configurations.configurations, fieldDescriptions: getRequiredSecretConfigFields()});
+    renderSetupPage(req, res, configurations);
 });
 
+function renderSetupPage(req, res, configurations) {
+    res.render("improperly_configured.html", {
+        configurations: configurations.configurations,
+        fieldDescriptions: {
+            secret: getRequiredSecretConfigFields(),
+            config: getRequiredConfigFields()
+        }
+    });
+}
+
+
 app.get("*", (req, res, next) => {
-    if (req.session.isLoggedIn) {
-        next();
+    // Show required login page if user is not logged in, and it is enabled.
+    if (!req.session.isLoggedIn && config.settings?.requireLoginForAccess) {
+        res.render("require_login.html");
         return;
     }
 
-    res.redirect("/login");
+    next();
 });
 
 app.get("/", (req, res) => {

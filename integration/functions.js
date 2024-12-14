@@ -5,6 +5,7 @@ const path = require("node:path");
 const { Server } = require("socket.io");
 const config = require("./config.json");
 const { default: axios } = require("axios");
+const dotNotes = require("dot-notes");
 
 const serverInfo = {
     readConfig: async function() {
@@ -300,6 +301,24 @@ function getAllValuesInObj(obj) {
 }
 
 /**
+ * Gets the keys of an object (recurse) - each levels of depth are represented by fullstops.
+ * 
+ * @param { Object } obj - Object to get keys of.
+ * @returns { any[] } List of object keys.
+ */
+async function getDeepObjectKeys(obj) {
+    return new Promise((resolve) => {
+        const paths = [];
+
+        dotNotes.recurse(obj, (key, value, path) => {
+            paths.push(path);
+        });
+
+        resolve(paths);
+    });
+}
+
+/**
  * Get a key value pair of fields that are required in secret.json for the app to work. Key is field name, and value is a short description.
  * 
  * @returns { Object }
@@ -316,6 +335,21 @@ function getRequiredSecretConfigFields() {
 }
 
 /**
+ * Get a key value pair of fields that are required in config.json for the app to work. Key is field name, and value is a short description.
+ * 
+ * @returns { Object }
+ */
+function getRequiredConfigFields() {
+    return {
+        "settings.serverUpdateInterval": "The interval (in seconds) for the server info to be updated on Discord",
+        "settings.url": "The website url",
+        "settings.requireLoginForAccess": "Should users have to login with Discord to use the site?",
+        "server.ip": "Minecraft server ip",
+        "server.port": "Minecraft server port"
+    };
+}
+
+/**
  * Validates all possible configurations and returns array of valid/invalid options.
  * 
  * @returns { {configurations: Object, isValid: Boolean} } Object of configuration options.
@@ -326,34 +360,65 @@ async function validateConfigurations() {
             "exists": false,
             "valid": false,
             "fields": {}
+        },
+        "configFile": {
+            "exists": false,
+            "valid": false,
+            "fields": {}
         }
     }
 
     const secretFilePath = path.join(__dirname, "secret.json");
+    const configFilePath = path.join(__dirname, "config.json");
 
-    if (!fs.existsSync(secretFilePath)) {
-        return configurations;
-    }
-
-    configurations.secretFile.exists = true;
-
-    let secrets = await fs.promises.readFile(secretFilePath, "utf-8");
-
-    try {
-        secrets = JSON.parse(secrets);
-    } catch (error) {
-        return configurations;
-    }
-
-    configurations.secretFile.valid = true;
-
-    const requiredFields = Object.keys(getRequiredSecretConfigFields());
-
-    // Check if secrets file contains field, and if so then set it to true in configuration validation check.
-    for (const field of requiredFields) {
-        configurations.secretFile.fields[field] = !!secrets[field];
-    }
+    // If secret.json exists, run through validations for the fields.
+    if (fs.existsSync(secretFilePath)) {
+        configurations.secretFile.exists = true;
     
+        let secrets = await fs.promises.readFile(secretFilePath, "utf-8");
+    
+        try {
+            secrets = JSON.parse(secrets);
+
+            configurations.secretFile.valid = true;
+        
+            const requiredFields = Object.keys(getRequiredSecretConfigFields());
+        
+            // Check if secrets file contains field, and if so then set it to true in configuration validation check.
+            for (const field of requiredFields) {
+                configurations.secretFile.fields[field] = !!secrets[field];
+            }
+
+        } catch (error) {
+            configurations.secretFile.valid = false;
+        }
+    
+    }
+
+    // If config.json exists, run through validations for the fields.
+    if (fs.existsSync(configFilePath)) {
+        configurations.configFile.exists = true;
+
+        configFields = await fs.promises.readFile(configFilePath, "utf-8");
+
+        try {
+            configFields = JSON.parse(configFields);
+
+            configurations.configFile.valid = true;
+
+            const requiredFields = Object.keys(getRequiredConfigFields());
+            const fields = await getDeepObjectKeys(configFields);
+
+            for (const field of requiredFields) {
+                // configurations.configFile.fields[field] = !!configFields[field];
+                configurations.configFile.fields[field] = !!fields.find(f => f === field);
+            }
+
+        } catch (error) {
+            configurations.configFile.valid = false;
+        }
+    }
+
     const isValid = getAllValuesInObj(configurations).every(conf => conf === true);
 
     return {configurations, isValid};
@@ -415,6 +480,7 @@ module.exports = {
     formatPlayTime,
     validateConfigurations,
     getRequiredSecretConfigFields,
+    getRequiredConfigFields,
     getBaseUrl,
     discordAuth
 };
