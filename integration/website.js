@@ -7,7 +7,7 @@ const config = require("./config.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory } = require("./functions");
 
 /** @type { Server } */
 let io;
@@ -69,9 +69,13 @@ app.get(["/js/*", "/css/*"], (req, res, next) => {
 
 app.use("*", (req, res, next) => {
     res.locals.session = req.session;
-    res.locals.getDiscordAvatar = function(userId, avatarId) {
+    res.locals.getDiscordAvatar = (userId, avatarId) => {
         return `https://cdn.discordapp.com/avatars/${userId}/${avatarId}`;
     }
+    res.locals.isAdmin = () => {
+        return config.settings.admins?.includes(req.session.discord?.id);
+    }
+    res.locals.calculateMemory = calculateMemory;
 
     next();
 });
@@ -100,7 +104,7 @@ app.get("/setup", async(req, res) => {
 });
 
 function renderSetupPage(req, res, configurations) {
-    res.render("improperly_configured.html", {
+    res.render("setupProject.html", {
         configurations: configurations.configurations,
         fieldDescriptions: {
             secret: getRequiredSecretConfigFields(),

@@ -197,3 +197,11 @@ a {
     display: unset;
     margin: unset;
 }
+
+.requiresRestart {
+    color: var(--discord_red);
+}
+
+form label {
+    vertical-align: top;
+}

@@ -11,5 +11,8 @@
 <body>
     <%- include("includes/header.html"); %>
     
+    <% if (isAdmin()) { %>
+        <p>Hi, Admin</p>
+    <% } %>
 </body>
 </html>

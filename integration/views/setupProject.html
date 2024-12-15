@@ -15,18 +15,30 @@
             <br>Sections marked with an 'x' indicate that an entry is missing or invalid, while a tick indicates it is fine.
         </p>
 
+        <form style="margin-bottom: 15px;">
+            <input class="showAllFieldsToggle" id="showAllFields" type="checkbox"/><label for="showAllFields">Show all fields</label>
+        </form>
+
         <div class="options">
 
             <div class="option">
                 <h2 class="label">
                     Create secret.json
 
-                    <% if (configurations.secretFile.exists && configurations.secretFile.valid) { %>
+                    <% const secretValid = configurations.secretFile.exists && configurations.secretFile.valid; %>
+
+                    <% if (secretValid) { %>
                         <span class="statusMark good"><i class="fa fa-check"></i></span>
                     <% } else { %>
                         <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
                     <% } %>
                 </h2>
+
+                <% if (!secretValid) { %>
+                    <p class="label">
+                        Make sure secret.json has been created, and is valid!
+                    </p>
+                <% } %>
             </div>
 
             <div class="option">
@@ -41,14 +53,13 @@
                     <% } %>
                 </h2>
 
-                <% const hideValidFields = true; %>
-                <% const fields = (hideValidFields) ? Object.entries(configurations.secretFile.fields).filter(s => !s[1]) : Object.entries(configurations.secretFile.fields); %>
+                <% const fields = Object.entries(configurations.secretFile.fields); %>
 
                 <% for (const [field, valid] of fields) { %>
-                    <p class="label">
-                        <% const desc = fieldDescriptions.secret[field] %>
+                    <p class="label <%= valid ? "valid" : "invalid" %>">
+                        <% const fieldInfo = fieldDescriptions.secret[field] %>
 
-                        <%= field%> <span class="description"><%= desc ? `- ${desc}` : '' %></span>
+                        <%= field%> <span class="description"><%= fieldInfo?.desc ? `- ${fieldInfo.desc}` : '' %></span>
                         <span class="statusMark <%= valid ? 'good' : 'bad' %>"><i class="fa fa-<%= valid ? 'check' : 'xmark' %>"></i></span>
                     </p>
                 <% } %>
@@ -58,12 +69,20 @@
                 <h2 class="label">
                     Create config.json
 
-                    <% if (configurations.configFile.exists && configurations.configFile.valid) { %>
+                    <% const configValid = configurations.configFile.exists && configurations.configFile.valid; %>
+
+                    <% if (configValid) { %>
                         <span class="statusMark good"><i class="fa fa-check"></i></span>
                     <% } else { %>
                         <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
                     <% } %>
                 </h2>
+
+                <% if (!configValid) { %>
+                    <p class="label">
+                        Make sure config.json has been created, and is valid!
+                    </p>
+                <% } %>
             </div>
 
             <div class="option">
@@ -78,13 +97,14 @@
                     <% } %>
                 </h2>
 
-                <% const configFields = (hideValidFields) ? Object.entries(configurations.configFile.fields).filter(s => !s[1]) : Object.entries(configurations.configFile.fields); %>
+                <% const configFields = Object.entries(configurations.configFile.fields); %>
 
                 <% for (const [field, valid] of configFields) { %>
-                    <p class="label">
-                        <% const desc = fieldDescriptions.config[field] %>
+                    <p class="label <%= valid ? "valid" : "invalid" %>">
+                        <% const fieldInfo = fieldDescriptions.config[field] %>
 
-                        <%= field%> <span class="description"><%= desc ? `- ${desc}` : '' %></span>
+                        <%- (fieldInfo.requiresRestart) ? `<span class="requiresRestart" title="Requires restart in order for change to take effect"><i class="fa fa-arrow-rotate-right"></i></span>` : "" %>
+                        <%= field%> <span class="description"><%= fieldInfo?.desc ? `- ${fieldInfo.desc}` : '' %></span>
                         <span class="statusMark <%= valid ? 'good' : 'bad' %>"><i class="fa fa-<%= valid ? 'check' : 'xmark' %>"></i></span>
                     </p>
                 <% } %>
@@ -92,7 +112,9 @@
 
         </div>
 
-        <p>You may need to restart the website for some changes to be recognised/take affect.</p>
+        <p>You may need to restart the website for some changes to be recognised/take effect.</p>
     </div>
 </body>
+<script src="/js/utils"></script>
+<script src="/js/pages/setupPage"></script>
 </html>

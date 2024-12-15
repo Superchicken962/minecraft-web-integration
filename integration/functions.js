@@ -311,6 +311,9 @@ async function getDeepObjectKeys(obj) {
         const paths = [];
 
         dotNotes.recurse(obj, (key, value, path) => {
+            // Remove the [0] so that array fields are shown as normal.
+            path = path.replaceAll("[0]", "");
+
             paths.push(path);
         });
 
@@ -325,12 +328,12 @@ async function getDeepObjectKeys(obj) {
  */
 function getRequiredSecretConfigFields() {
     return {
-        "clientId": "Discord application client id",
-        "clientSecret": "Discord application client secret",
-        "guildId": "Id of Discord server to use",
-        "token": "Discord bot token",
-        "webhookURL": "Discord webhook to send logs to",
-        "socketAuthToken": "Authentication token for socket - must match token given in plugin (config.yml)"
+        "clientId": {desc: "Discord application client id"},
+        "clientSecret": {desc: "Discord application client secret"},
+        "guildId": {desc: "Id of Discord server to use"},
+        "token": {desc: "Discord bot token"},
+        "webhookURL": {desc: "Discord webhook to send logs to"},
+        "socketAuthToken": {desc: "Authentication token for socket - must match token given in plugin (config.yml)"}
     };
 }
 
@@ -341,11 +344,18 @@ function getRequiredSecretConfigFields() {
  */
 function getRequiredConfigFields() {
     return {
-        "settings.serverUpdateInterval": "The interval (in seconds) for the server info to be updated on Discord",
-        "settings.url": "The website url",
-        "settings.requireLoginForAccess": "Should users have to login with Discord to use the site?",
-        "server.ip": "Minecraft server ip",
-        "server.port": "Minecraft server port"
+        "settings.serverUpdateInterval": {desc: "The interval (in seconds) for the server info to be updated on Discord", requiresRestart: false, default: 90},
+        "settings.url": {desc: "The website url", requiresRestart: true},
+        "settings.requireLoginForAccess": {desc: "Should users have to login with Discord to use the site?", requiresRestart: true, default: false},
+        "settings.admins": {desc: "Array of discord ids that should be given admin access (must contain at least one id).", requiresRestart: true},
+        "server.ip": {desc: "Minecraft server ip", requiresRestart: true, default: "127.0.0.1"},
+        "server.port": {desc: "Minecraft server port", requiresRestart: true, default: "25565"},
+        "server.memory": {desc: "Memory to allocate the minecraft server (in gigabytes)", requiresRestart: true, default: 2},
+        "features.discordChatRelay": {desc: "Enable chat relay between discord and the minecraft server.", requiresRestart: true, default: true},
+        "features.logging.death": {desc: "Log player deaths?", requiresRestart: true, default: true},
+        "features.logging.join": {desc: "Log player joins?", requiresRestart: true, default: true},
+        "features.logging.disconnect": {desc: "Log player disconnects?", requiresRestart: true, default: true},
+        "features.logging.chat": {desc: "Log player chat?", requiresRestart: true, default: true}
     };
 }
 
@@ -410,7 +420,6 @@ async function validateConfigurations() {
             const fields = await getDeepObjectKeys(configFields);
 
             for (const field of requiredFields) {
-                // configurations.configFile.fields[field] = !!configFields[field];
                 configurations.configFile.fields[field] = !!fields.find(f => f === field);
             }
 
@@ -474,6 +483,16 @@ const discordAuth = {
     }
 };
 
+/**
+ * Converts gigabytes into megabyte memory format for minecraft server.
+ * 
+ * @param { Number } gb - Gigabytes to convert.
+ * @returns { Number } Memory to allocate server in megabytes.
+*/
+function calculateMemory(gb) {
+    return gb*1024;
+}
+
 module.exports = {
     serverInfo,
     askSocket,
@@ -482,5 +501,6 @@ module.exports = {
     getRequiredSecretConfigFields,
     getRequiredConfigFields,
     getBaseUrl,
-    discordAuth
+    discordAuth,
+    calculateMemory
 };
