@@ -8,19 +8,9 @@
     <link rel="stylesheet" href="/css/main"/>
 </head>
 <body>
-    <% if (!viewmode) { %>
-        <%- include("includes/choosemode.html"); %>
-    <% } %>
-    <% if (viewmode === "admin" && !auth) { %>
-        <%- include("includes/authenticate.html"); %>
-    <% } %>
+    <%- include("includes/header.html"); %>
 
-    <% if (viewmode === "admin" && auth === true) { %>
-        <p><i>Logged in as Admin <a href="/mode/null">(logout)</a></i></p>
-    <% } %>
-
-    <!-- Add last 15 or so logs -->
-
+    <%# Add last 15 or so logs %>
     <% recentLogs.forEach((log) => { %>
         <% var datesent = new Date(parseInt(log.event.time)); %>
         <% console.log(log); %>

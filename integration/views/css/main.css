@@ -1,6 +1,9 @@
 :root {
     --discord_blurple: #5865F2;
-    --discord_blurple_2: rgb(114, 137, 218);
+    --discord_blurple_2: #7289da;
+    --discord_red: #ed4245;
+    --discord_green: #57F287;
+    --discord_yellow: #FEE75C;
 }
 
 body {
@@ -143,6 +146,7 @@ a {
     font-size: 18px;
     --colour: rgb(33, 134, 230);
     background-color: var(--colour);
+    text-decoration: none;
 }
 .btn:hover {
     cursor: pointer;
@@ -152,6 +156,44 @@ a {
     vertical-align: bottom;
 }
 
-.discordLogin.btn {
+.btn.bad {
+    --colour: var(--discord_red);
+}
+.btn.good {
+    --colour: var(--discord_green);
+    color: black;
+}
+.btn.neutral {
+    --colour: var(--discord_yellow);
+    color: black;
+}
+
+.btn.discord {
     --colour: var(--discord_blurple_2);
+}
+
+.header {
+    display: block;
+    margin: auto;
+}
+.header .account {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    float: right;
+    margin-right: 15px;
+}
+.header .account .username {
+    font-size: 22px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.header .account .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+.header .account .btn {
+    display: unset;
+    margin: unset;
 }

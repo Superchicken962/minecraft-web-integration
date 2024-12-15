@@ -67,6 +67,15 @@ app.get(["/js/*", "/css/*"], (req, res, next) => {
     res.sendFile(filePath);
 });
 
+app.use("*", (req, res, next) => {
+    res.locals.session = req.session;
+    res.locals.getDiscordAvatar = function(userId, avatarId) {
+        return `https://cdn.discordapp.com/avatars/${userId}/${avatarId}`;
+    }
+
+    next();
+});
+
 app.use("*", async(req, res, next) => {
     const configurations = await validateConfigurations();
 
@@ -79,6 +88,11 @@ app.use("*", async(req, res, next) => {
 });
 
 app.use("/login", require("./auth"));
+app.get(["/logout", "/signout"], (req, res) => {
+    req.session.destroy(() => {
+        res.redirect("/");
+    });
+});
 
 app.get("/setup", async(req, res) => {
     const configurations = await validateConfigurations();
