@@ -7,7 +7,7 @@ const config = require("./config.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin } = require("./functions");
 
 /** @type { Server } */
 let io;
@@ -18,7 +18,7 @@ exports.register = function(socketIo) {
     // Handle connection for server namespace.
     io.of("/server").on("connection", (socket) => {
         const authorised = (socket.handshake.auth?.token === secret.socketAuthToken);
-        console.log("new /server connection", {authorised});
+        // console.log("new /server connection", {authorised});
 
         if (!authorised) {
             socket.disconnect(true);
@@ -38,6 +38,19 @@ exports.register = function(socketIo) {
             delete askSocket.socketAwaitingResponse[data.id];
         });
     });
+
+    // Website client to server connections for admins.
+    io.of("/admin").on("connection", (socket) => {
+        const authorised = isAdmin(socket.handshake?.auth?.discord);
+
+        // Ensure that only admins are connected to this namespace.
+        if (!authorised) {
+            socket.disconnect(true);
+            return;
+        }
+    });
+
+    initSocketListeners(io.of("/server"));
 }
 
 app.get(["/js/*", "/css/*"], (req, res, next) => {    
@@ -72,9 +85,11 @@ app.use("*", (req, res, next) => {
     res.locals.getDiscordAvatar = (userId, avatarId) => {
         return `https://cdn.discordapp.com/avatars/${userId}/${avatarId}`;
     }
-    res.locals.isAdmin = () => {
-        return config.settings.admins?.includes(req.session.discord?.id);
-    }
+    res.locals.isAdmin = (id) => {
+        return isAdmin(id || req.session?.discord?.id);
+    };
+    res.locals.isAdmin = isAdmin(req.session?.discord?.id);
+
     res.locals.calculateMemory = calculateMemory;
 
     next();
@@ -97,6 +112,8 @@ app.get(["/logout", "/signout"], (req, res) => {
         res.redirect("/");
     });
 });
+
+app.use("/manage", require("./manage"));
 
 app.get("/setup", async(req, res) => {
     const configurations = await validateConfigurations();
@@ -223,7 +240,8 @@ app.post("/api/post/log/:type", (req, res) => {
                 time: req.body["eventTime"]
             }
         };
-        io.emit("log:console", log);
+        // Send to admin namespace.
+        io.of("/admin").emit("log:console", log);
         recentLogs.push(log);
 
         return;
@@ -355,5 +373,48 @@ app.get("/get/statistic/:type", (req, res) => {
     var findstat = stats.filter(stat => stat.statname === sname);
     res.send(findstat);
 });
+
+function initSocketListeners(socketInstance) {
+    askSocket.listenFor(socketInstance, "event", (data) => {
+        console.log("event", data);
+    });
+
+    setInterval(() => {
+        const log = {
+            sender: {
+                username: "mark",
+                ip: "127.0.0.1",
+                ping: "0",
+                isOperator: "true",
+                avatarUrl: "https://minotar.net/avatar/069a79f444e94726a5befca90e38aaf5/64"
+            },
+            message: {
+                content: "Test"
+            },
+            event: {
+                type: "chat",
+                time: Date.now(),
+            }
+        };
+        io.emit("log:chat", log);
+    }, 9000);
+
+    setInterval(() => {
+        io.emit("log:playerjoinorleave", {
+            player: {
+                username: "mark",
+                ip: "127.0.0.1",
+                ping: "0",
+                isOperator: "true",
+                avatarUrl: "https://minotar.net/avatar/069a79f444e94726a5befca90e38aaf5/64"
+            },
+            event: {
+                type: "join",
+                time: Date.now(),
+                message: "%p has left the game"
+            }
+        });
+    }, 5000);
+}
 
 exports.router = app;

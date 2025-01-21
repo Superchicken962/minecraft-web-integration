@@ -2,11 +2,16 @@
     "settings": {
         "serverUpdateInterval": 90,
         "url": "http://127.0.0.1:3003/",
-        "requireLoginForAccess": true
+        "requireLoginForAccess": true,
+        "admins": [
+            "406973124719149056"
+        ]
     },
     "server": {
         "ip": "127.0.0.1",
-        "port": "25565"
+        "port": "25565",
+        "memory": 1,
+        "pathTo": "D:\\minecraft server\\dev server\\server.jar"
     },
     "serverB": {
         "ip": "159.13.48.200",
@@ -15,5 +20,17 @@
     "message": {
         "channelId": "1098579574218047580",
         "messageId": "1098975661005209640"
+    },
+    "features": {
+        "discordChatRelay": {
+            "enabled": true,
+            "channelId": "1100778824834224128"
+        },
+        "logging": {
+            "death": true,
+            "join": true,
+            "disconnect": true,
+            "chat": true
+        }
     }
 }

@@ -156,6 +156,13 @@ a {
     vertical-align: bottom;
 }
 
+.btn.inline {
+    display: inline-block;
+}
+
+.btn.right { float: right; margin-left: 10px; }
+.btn.left { float: left; margin-right: 10px; }
+
 .btn.bad {
     --colour: var(--discord_red);
 }
@@ -175,6 +182,7 @@ a {
 .header {
     display: block;
     margin: auto;
+    height: 70px;
 }
 .header .account {
     display: flex;
@@ -204,4 +212,147 @@ a {
 
 form label {
     vertical-align: top;
+}
+
+p.label.valid {
+    display: none;
+}
+
+.mainMenu {
+    display: block;
+    margin: auto;
+    width: 60%;
+    text-align: center;
+    background-color: rgb(28,28,28);
+    padding: 4px 12px;
+    border-radius: 10px;
+}
+@media screen and (max-width: 500px) {
+    .mainMenu {
+        width: 95%;
+    }
+}
+.mainMenu .button {
+    display: block;
+    margin: auto;
+    width: 80%;
+    background-color: rgb(36,36,36);
+    padding: 12px 8px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-size: 18px;
+    text-decoration: none;
+    transition: 0.2s ease-in-out background-color;
+}
+.mainMenu .button:hover {
+    background-color: rgb(46,46,46);
+}
+
+.logsContainer {
+    display: block;
+    margin: auto;
+    width: 60%;
+    background-color: rgb(40,40,40);
+    border-radius: 10px;
+    padding: 12px;
+}
+.logsContainer .logs {
+    display: block;
+    /* min-height: 500px;
+    max-height: 500px; */
+    height: 500px;
+    overflow-y: auto;
+    background-color: rgb(45,45,45);
+    padding: 4px 12px;
+    border-radius: 10px;
+}
+.logsContainer .logs .log {
+    display: block;
+    margin: auto;
+    margin-bottom: 15px;
+}
+.logsContainer .logs .log .chatMessage {
+    display: block;
+    margin: auto;
+    width: 95%;
+    padding: 4px 8px;
+    border-radius: 5px;
+    background-color: rgb(15,15,15);
+    border-left: 4px solid var(--discord_green);
+}
+.log .avatar {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+.log .chatMessage .content {
+    display: block;
+}
+.log .time {
+    display: block;
+    margin: auto;
+    color: grey;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.log .joinLeave {
+    display: block;
+    margin: auto;
+    width: 95%;
+}
+
+.logsContainer .input {
+    display: block;
+    margin: auto;
+    margin-top: 10px;
+    text-align: center;
+}
+.logsContainer .input input[type=text] {
+    display: inline-block;
+    width: 80%;
+    height: 30px;
+    outline: none;
+    border: none;
+    background-color: rgba(170,170,170);
+    border-radius: 5px;
+    transition: 0.2s ease-in-out background-color;
+}
+.logsContainer .input input[type=text]:focus {
+    background-color: rgba(210,210,210);
+}
+.logsContainer .input input[type=submit] {
+    display: inline-block;
+    width: 15%;
+    height: 30px;
+    outline: none;
+    border: none;
+    background-color: rgba(190,190,190);
+    border-radius: 5px;
+    transition: 0.2s ease-in-out background-color;
+}
+.logsContainer .input input[type=submit]:hover {
+    background-color: rgba(230,230,230);
+    cursor: pointer;
+}
+
+@media screen and (max-width: 500px) {
+    .logsContainer {
+        width: 95%;
+    }
+}
+
+/* Server logs on /manage page */
+.logsContainer.serverLogs {
+    width: 90% !important;
+    margin-top: 15px;
+}
+
+.buttonGroup {
+    display: block;
+    margin: auto;
+    width: 90%;
+    height: 30px;
 }

@@ -222,6 +222,7 @@ const askSocket = {
     socketAwaitingResponse: {},
 
     /**
+     * Ask the minecraft server something over the socket.
      * 
      * @param { Server } socket - Socket server.
      * @param { String | Object } event - Event name or data.
@@ -249,6 +250,17 @@ const askSocket = {
         }
 
         socket.emit("askServer", data);
+    },
+
+    /**
+     * Listen for an event from the minecraft server socket.
+     * 
+     * @param { Server } socket - Socket server.
+     * @param { String } event - Event name.
+     * @param { (data: Object) => {} } callback - Callback function.
+     */
+    listenFor: function(socket, event, callback) {
+        socket.on(event, callback);
     }
 };
 
@@ -351,7 +363,8 @@ function getRequiredConfigFields() {
         "server.ip": {desc: "Minecraft server ip", requiresRestart: true, default: "127.0.0.1"},
         "server.port": {desc: "Minecraft server port", requiresRestart: true, default: "25565"},
         "server.memory": {desc: "Memory to allocate the minecraft server (in gigabytes)", requiresRestart: true, default: 2},
-        "features.discordChatRelay": {desc: "Enable chat relay between discord and the minecraft server.", requiresRestart: true, default: true},
+        "features.discordChatRelay.enabled": {desc: "Enable chat relay between discord and the minecraft server.", requiresRestart: true, default: true},
+        "features.discordChatRelay.channelId": {desc: "Channel to use for chat relay - use command mc!relay in a discord channel to set it.", requiresRestart: true, required: false},
         "features.logging.death": {desc: "Log player deaths?", requiresRestart: true, default: true},
         "features.logging.join": {desc: "Log player joins?", requiresRestart: true, default: true},
         "features.logging.disconnect": {desc: "Log player disconnects?", requiresRestart: true, default: true},
@@ -470,8 +483,8 @@ const discordAuth = {
     /**
      * Fetch logged in user discord info.
      * 
-     * @param {*} tokenType - Token type from authentication.
-     * @param {*} accessToken - Access token from authentication.
+     * @param { String } tokenType - Token type from authentication.
+     * @param { String } accessToken - Access token from authentication.
      * @returns { Promise<axios.AxiosResponse> } Response from Discord.
      */
     getInfo: async function(tokenType, accessToken) {
@@ -493,6 +506,16 @@ function calculateMemory(gb) {
     return gb*1024;
 }
 
+/**
+ * Checks if given id is in the config as an admin.
+ * 
+ * @param { String } id - User's Discord id.
+ * @returns { Boolean } Is user an admin?
+ */
+function isAdmin(id) {
+    return config.settings.admins?.includes(id);
+}
+
 module.exports = {
     serverInfo,
     askSocket,
@@ -502,5 +525,6 @@ module.exports = {
     getRequiredConfigFields,
     getBaseUrl,
     discordAuth,
-    calculateMemory
+    calculateMemory,
+    isAdmin
 };
