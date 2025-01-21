@@ -75,12 +75,10 @@ class ServerManager {
         }
 
         // Write "stop" to the process to stop the mincraft server safely - then kill process and set var to null.
-        this.#process.stdin.write("stop", (err) => {
+        this.#process.stdin.write("stop\n", (success, err) => {
             if (err) {
                 throw new Error("Error stopping server: ", err);
             }
-
-            this.#process.stdin.end();
 
             this.#process.kill(0);
             this.#process = null;
@@ -104,8 +102,6 @@ class ServerManager {
 
         // Remove filename from path.
         path = path.replace(fileName, "");
-
-        console.log(path, fileName);
 
         const process = spawn("java", [`-Xmx${memory}M`, `-Xms${memory}M`, `-jar`, fileName, "nogui"], { shell: true, cwd: path });
 
@@ -148,6 +144,25 @@ class ServerManager {
      */
     clearLogs() {
         this.#logs.length = 0;
+    }
+
+    /**
+     * Enter a command to the server.
+     * 
+     * @param { String } cmd - Command to enter.
+     * @returns { Promise<Boolean> } Was it a success?
+     */
+    enterCommand(cmd) {
+        return new Promise(resolve => {
+            if (!this.running) {
+                resolve(false);
+                return;
+            }
+
+            this.#process.stdin.write(`${cmd}\n`, (success) => {
+                resolve(success);
+            });
+        });
     }
 }
 

@@ -51,4 +51,15 @@ app.get("/api/logs/clear", (req, res) => {
     res.sendStatus(200);
 });
 
+// Handle submission from form - it will redirect instead of returning status code.
+app.get("/api/logs/submit", async(req, res) => {
+    const command = req.query.command;
+
+    if (command) {
+        await minecraftServer.enterCommand(command);
+    }
+
+    res.redirect("/manage");
+});
+
 module.exports = app;

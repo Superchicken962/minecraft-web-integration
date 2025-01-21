@@ -33,10 +33,10 @@
                 <% } %>
             </div>
             
-            <div class="input">
-                <input class="chatInput" type="text"/>
+            <form class="input" action="/manage/api/logs/submit" method="GET">
+                <input class="chatInput" type="text" name="command"/>
                 <input class="chatSend" type="submit" value="Send"/>
-            </div>
+            </form>
         </div>
     </div>
 
