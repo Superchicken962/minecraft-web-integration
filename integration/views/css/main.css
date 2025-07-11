@@ -193,17 +193,51 @@ a {
 }
 .header .account .username {
     font-size: 22px;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin: auto;
 }
 .header .account .avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
+    margin-right: 5px;
 }
 .header .account .btn {
     display: unset;
     margin: unset;
+    margin-left: 10px;
+}
+.header .mobileMenu {
+    display: none;
+}
+@media screen and (max-width: 450px) {
+    .header .account {
+        margin-right: 0;
+        margin-top: 0;
+    }
+
+    .header .account .username, .header .account .logoutBtn {
+        display: none;
+    }
+
+    .header .account .avatar {
+        background-color: rgb(25,25,25);
+    }
+
+    .header .account .avatarContainer:hover .mobileMenu {
+        display: block;
+        margin: auto;
+        position: absolute;
+        background-color: var(--discord_blurple_2);
+        width: 100px;
+        right: 10px;
+        top: 55px;
+        padding: 8px 4px;
+        border-radius: 5px;
+    }
+    .header .mobileMenu .btn {
+        background-color: transparent;
+        box-shadow: none;
+    }
 }
 
 .requiresRestart {

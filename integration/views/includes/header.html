@@ -1,11 +1,22 @@
 <div class="header">
-    <div class="account">
-        <% if (session.isLoggedIn) { %>
-            <img class="avatar" src="<%= getDiscordAvatar(session.discord.id, session.discord.avatar)%>"/>
-            <p class="username"><%= session.discord.global_name %></p>
-            <a class="btn bad" href="/logout">Logout</a>
-        <% } else { %>
-            <a class="btn discord" href="/login"><i class="fa-brands fa-discord"></i> Login</a>
-        <% } %>
+    <div class="navButtons">
+        <a class="btn inline" href="/">Home</a>
+        <a class="btn inline" href="/logs">Logs</a>
+
+        <div class="account">
+            <% if (session.isLoggedIn) { %>
+                <div class="avatarContainer">
+                    <img class="avatar" src="<%= getDiscordAvatar(session.discord.id, session.discord.avatar)%>"/>
+
+                    <div class="mobileMenu">
+                        <a class="btn bad" href="/logoust">Logout</a>
+                    </div>
+                </div>
+                <p class="username"><%= session.discord.global_name %></p>
+                <a class="btn bad logoutBtn" href="/logout">Logout</a>
+            <% } else { %>
+                <a class="btn discord" href="/login"><i class="fa-brands fa-discord"></i> Login</a>
+            <% } %>
+        </div>
     </div>
 </div>
