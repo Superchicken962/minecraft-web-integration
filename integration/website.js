@@ -7,7 +7,7 @@ const config = require("./config.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile } = require("./functions");
 
 /** @type { Server } */
 let io;
@@ -93,6 +93,27 @@ app.use("*", (req, res, next) => {
     res.locals.calculateMemory = calculateMemory;
 
     next();
+});
+
+app.get("/configure", async(req, res, next) => {
+    // Only allow non admins to access page if there are no configured admins (prevent "softlock" of new config).
+    if (config?.settings?.admins?.length > 0 && !isAdmin(req.session?.discord?.id)) {
+        return next();
+    }
+
+    const cfg = await readJsonFile("config.json");
+    const scrt = await readJsonFile("secret.json");
+
+    res.render("edit_config.html", {
+        required: {
+            secret: getRequiredSecretConfigFields(),
+            config: getRequiredConfigFields()
+        },
+        existing: {
+            secret: scrt,
+            config: cfg
+        }
+    });
 });
 
 app.use("*", async(req, res, next) => {

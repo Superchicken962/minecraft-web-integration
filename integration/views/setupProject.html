@@ -10,109 +10,114 @@
 <body>
     <div class="misconfigurationMenu">
         <h1>Project Setup</h1>
-        <p>
-            Check the summary below to see any missing or invalid options to make according changes for the website to work!
-            <br>Sections marked with an 'x' indicate that an entry is missing or invalid, while a tick indicates it is fine.
-        </p>
+        <% if (isAdmin) { %>          
+            <p>
+                Check the summary below to see any missing or invalid options to make according changes for the website to work!
+                <br>Sections marked with an 'x' indicate that an entry is missing or invalid, while a tick indicates it is fine.
+            </p>
 
-        <form style="margin-bottom: 15px;">
-            <input class="showAllFieldsToggle" id="showAllFields" type="checkbox"/><label for="showAllFields">Show valid fields</label>
-        </form>
+            <form style="margin-bottom: 15px;">
+                <input class="showAllFieldsToggle" id="showAllFields" type="checkbox"/><label for="showAllFields">Show valid fields</label>
+            </form>
 
-        <div class="options">
+            <div class="options">
 
-            <div class="option">
-                <h2 class="label">
-                    Create secret.json
+                <div class="option">
+                    <h2 class="label">
+                        Create secret.json
 
-                    <% const secretValid = configurations.secretFile.exists && configurations.secretFile.valid; %>
+                        <% const secretValid = configurations.secretFile.exists && configurations.secretFile.valid; %>
 
-                    <% if (secretValid) { %>
-                        <span class="statusMark good"><i class="fa fa-check"></i></span>
-                    <% } else { %>
-                        <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
+                        <% if (secretValid) { %>
+                            <span class="statusMark good"><i class="fa fa-check"></i></span>
+                        <% } else { %>
+                            <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
+                        <% } %>
+                    </h2>
+
+                    <% if (!secretValid) { %>
+                        <p class="label">
+                            Make sure secret.json has been created, and is valid!
+                        </p>
                     <% } %>
-                </h2>
+                </div>
 
-                <% if (!secretValid) { %>
-                    <p class="label">
-                        Make sure secret.json has been created, and is valid!
-                    </p>
-                <% } %>
+                <div class="option">
+                    <h2 class="label">
+                        Data in secret.json
+                        
+                        <%# Show a tick if every field is valid, otherwise show a cross. %>
+                        <% if (Object.values(configurations.secretFile.fields).every(f => f === true)) { %>
+                            <span class="statusMark good"><i class="fa fa-check"></i></span>
+                        <% } else { %>
+                            <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
+                        <% } %>
+                    </h2>
+
+                    <% const fields = Object.entries(configurations.secretFile.fields); %>
+
+                    <% for (const [field, valid] of fields) { %>
+                        <p class="label <%= valid ? "valid" : "invalid" %>">
+                            <% const fieldInfo = fieldDescriptions.secret[field] %>
+
+                            <%= field%> <span class="description"><%= fieldInfo?.desc ? `- ${fieldInfo.desc}` : '' %></span>
+                            <span class="statusMark <%= valid ? 'good' : 'bad' %>"><i class="fa fa-<%= valid ? 'check' : 'xmark' %>"></i></span>
+                        </p>
+                    <% } %>
+                </div>
+
+                <div class="option">
+                    <h2 class="label">
+                        Create config.json
+
+                        <% const configValid = configurations.configFile.exists && configurations.configFile.valid; %>
+
+                        <% if (configValid) { %>
+                            <span class="statusMark good"><i class="fa fa-check"></i></span>
+                        <% } else { %>
+                            <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
+                        <% } %>
+                    </h2>
+
+                    <% if (!configValid) { %>
+                        <p class="label">
+                            Make sure config.json has been created, and is valid!
+                        </p>
+                    <% } %>
+                </div>
+
+                <div class="option">
+                    <h2 class="label">
+                        Data in config.json
+
+                        <%# Show a tick if every field is valid, otherwise show a cross. %>
+                        <% if (Object.values(configurations.configFile.fields).every(f => f === true)) { %>
+                            <span class="statusMark good"><i class="fa fa-check"></i></span>
+                        <% } else { %>
+                            <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
+                        <% } %>
+                    </h2>
+
+                    <% const configFields = Object.entries(configurations.configFile.fields); %>
+
+                    <% for (const [field, valid] of configFields) { %>
+                        <p class="label <%= valid ? "valid" : "invalid" %>">
+                            <% const fieldInfo = fieldDescriptions.config[field] %>
+
+                            <%- (fieldInfo.requiresRestart) ? `<span class="requiresRestart" title="Requires restart in order for change to take effect"><i class="fa fa-arrow-rotate-right"></i></span>` : "" %>
+                            <%= field%> <span class="description"><%= fieldInfo?.desc ? `- ${fieldInfo.desc}` : '' %></span>
+                            <span class="statusMark <%= valid ? 'good' : 'bad' %>"><i class="fa fa-<%= valid ? 'check' : 'xmark' %>"></i></span>
+                        </p>
+                    <% } %>
+                </div>
+
             </div>
 
-            <div class="option">
-                <h2 class="label">
-                    Data in secret.json
-                    
-                    <%# Show a tick if every field is valid, otherwise show a cross. %>
-                    <% if (Object.values(configurations.secretFile.fields).every(f => f === true)) { %>
-                        <span class="statusMark good"><i class="fa fa-check"></i></span>
-                    <% } else { %>
-                        <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
-                    <% } %>
-                </h2>
-
-                <% const fields = Object.entries(configurations.secretFile.fields); %>
-
-                <% for (const [field, valid] of fields) { %>
-                    <p class="label <%= valid ? "valid" : "invalid" %>">
-                        <% const fieldInfo = fieldDescriptions.secret[field] %>
-
-                        <%= field%> <span class="description"><%= fieldInfo?.desc ? `- ${fieldInfo.desc}` : '' %></span>
-                        <span class="statusMark <%= valid ? 'good' : 'bad' %>"><i class="fa fa-<%= valid ? 'check' : 'xmark' %>"></i></span>
-                    </p>
-                <% } %>
-            </div>
-
-            <div class="option">
-                <h2 class="label">
-                    Create config.json
-
-                    <% const configValid = configurations.configFile.exists && configurations.configFile.valid; %>
-
-                    <% if (configValid) { %>
-                        <span class="statusMark good"><i class="fa fa-check"></i></span>
-                    <% } else { %>
-                        <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
-                    <% } %>
-                </h2>
-
-                <% if (!configValid) { %>
-                    <p class="label">
-                        Make sure config.json has been created, and is valid!
-                    </p>
-                <% } %>
-            </div>
-
-            <div class="option">
-                <h2 class="label">
-                    Data in config.json
-
-                    <%# Show a tick if every field is valid, otherwise show a cross. %>
-                    <% if (Object.values(configurations.configFile.fields).every(f => f === true)) { %>
-                        <span class="statusMark good"><i class="fa fa-check"></i></span>
-                    <% } else { %>
-                        <span class="statusMark bad"><i class="fa fa-xmark"></i></span>
-                    <% } %>
-                </h2>
-
-                <% const configFields = Object.entries(configurations.configFile.fields); %>
-
-                <% for (const [field, valid] of configFields) { %>
-                    <p class="label <%= valid ? "valid" : "invalid" %>">
-                        <% const fieldInfo = fieldDescriptions.config[field] %>
-
-                        <%- (fieldInfo.requiresRestart) ? `<span class="requiresRestart" title="Requires restart in order for change to take effect"><i class="fa fa-arrow-rotate-right"></i></span>` : "" %>
-                        <%= field%> <span class="description"><%= fieldInfo?.desc ? `- ${fieldInfo.desc}` : '' %></span>
-                        <span class="statusMark <%= valid ? 'good' : 'bad' %>"><i class="fa fa-<%= valid ? 'check' : 'xmark' %>"></i></span>
-                    </p>
-                <% } %>
-            </div>
-
-        </div>
-
-        <p>You may need to restart the website for some changes to be recognised/take effect.</p>
+            <p>You may need to restart the website for some changes to be recognised/take effect.</p>
+            <p><a class="btn inline neutral" href="/configure">Edit Config</a></p>
+        <% } else { %>
+            <p>The project may not be setup correctly. If you are an admin, <a class="link" href="/login">login</a> to see more details.</p>
+        <% } %>
     </div>
 </body>
 <script src="/js/utils"></script>

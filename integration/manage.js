@@ -57,6 +57,9 @@ app.get("/api/logs/submit", async(req, res) => {
 
     if (command) {
         await minecraftServer.enterCommand(command);
+
+        // Add an artificial delay so that the log from the result of the command is shown after redirect.
+        await new Promise(resolve => setTimeout(resolve, 50));
     }
 
     res.redirect("/manage");

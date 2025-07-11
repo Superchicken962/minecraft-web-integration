@@ -22,8 +22,6 @@ const config = require("./config.json");
 
 process.env.TZ = "Australia/Adelaide";
 
-module.exports.socketIo = io; // make socket.io accessible in website.js etc
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.engine("html", require('ejs').renderFile);

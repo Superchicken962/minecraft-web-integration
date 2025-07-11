@@ -32,6 +32,11 @@ const serverInfo = {
     },
 
     /**
+     * Timeout of server info updater.
+     */
+    updateTimeout: null,
+
+    /**
      * Update server information.
      * 
      * @param { Client } client - Discord bot client.
@@ -39,6 +44,12 @@ const serverInfo = {
      * @returns 
      */
     update: async function(client, io) {
+        const setUpdateTimeout = () => {
+            this.updateTimeout = setTimeout(() => {
+                this.update(client, io);
+            }, (cfg.settings?.serverUpdateInterval || 90)*1000);
+        };
+
         let cfg = await this.readConfig();
 
         if (!cfg.server?.ip || !cfg.server?.port) {
@@ -93,7 +104,8 @@ const serverInfo = {
                 "type": "minecraft"
             });
         } catch (error) {
-            console.log("Server is offline");
+            // Server is offline - set update timeout again.
+            setUpdateTimeout();
             return;
         }
 
@@ -187,17 +199,14 @@ const serverInfo = {
             ]
         });
 
-
-        setTimeout(() => {
-            this.update(client, io);
-        }, (cfg.settings?.serverUpdateInterval || 90)*1000);
+        setUpdateTimeout();
     },
 
     /**
      * Sends status message.
      * 
      * @param { import("discord.js").Channel } channel - Channel to send message to.
-     * @returns { Message } Newly sent message.
+     * @returns { Promise<Message> } Newly sent message.
      */
     sendMessage: async function(channel) {
         // Send just a fullstop for the message will be edited shortly after.
@@ -375,7 +384,7 @@ function getRequiredConfigFields() {
 /**
  * Validates all possible configurations and returns array of valid/invalid options.
  * 
- * @returns { {configurations: Object, isValid: Boolean} } Object of configuration options.
+ * @returns { Promise<{ configurations: Object, isValid: Boolean }> } Object of configuration options.
  */
 async function validateConfigurations() {
     const configurations = {
@@ -513,7 +522,28 @@ function calculateMemory(gb) {
  * @returns { Boolean } Is user an admin?
  */
 function isAdmin(id) {
-    return config.settings.admins?.includes(id);
+    return config?.settings?.admins?.includes(id);
+}
+
+/**
+ * Reads and parses a json file at a given path.
+ * 
+ * @param { String } path - Path to file.
+ * @returns { Promise<Object> } Parsed JSON, empty if invalid.
+ */
+async function readJsonFile(path) {
+    if (!fs.existsSync(path)) {
+        return {};
+    }
+
+    const content = await fs.promises.readFile(path);
+
+    try {
+        const data = JSON.parse(content);
+        return data;
+    } catch (error) {
+        return {};
+    }
 }
 
 module.exports = {
@@ -526,5 +556,6 @@ module.exports = {
     getBaseUrl,
     discordAuth,
     calculateMemory,
-    isAdmin
+    isAdmin,
+    readJsonFile
 };

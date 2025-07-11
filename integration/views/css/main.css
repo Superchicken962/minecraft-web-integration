@@ -356,3 +356,10 @@ p.label.valid {
     width: 90%;
     height: 30px;
 }
+
+a.link {
+    color: rgb(255, 179, 39);
+}
+a.link:hover {
+    opacity: 0.8;
+}

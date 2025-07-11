@@ -2,24 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Server</title>
+    <title>Minecraft Server - Configure</title>
     <link rel="stylesheet" href="/css/main"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <%- include("includes/header.html"); %>
     
-    <div class="mainMenu">
-        <h1>Minecraft Server</h1>
+    <div class="misconfigurationMenu">
+        <h1>Configure</h1>
 
-        <a class="button" href="/logs">Logs</a>
-
-        <% if (isAdmin) { %>
-            <a class="button" href="/manage">Manage</a>
-            <a class="button" href="/configure">Configure</a>
-        <% } %>
+        <h3>config.json</h3>
+        <h3>secret.json</h3>
     </div>
 </body>
 </html>

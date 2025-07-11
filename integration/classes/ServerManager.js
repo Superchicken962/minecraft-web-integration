@@ -1,6 +1,8 @@
-const { fork, spawn } = require("child_process");
+const { spawn } = require("child_process");
 const { Server } = require("socket.io");
 const { calculateMemory } = require("../functions");
+
+const MAX_STORED_LOGS = 6;
 
 /**
  * Log object
@@ -106,19 +108,13 @@ class ServerManager {
         const process = spawn("java", [`-Xmx${memory}M`, `-Xms${memory}M`, `-jar`, fileName, "nogui"], { shell: true, cwd: path });
 
         process.stdout.on("data", (data) => {
-            this.#logs.push({
-                message: data,
-                isError: false
-            });
+            this.#logData(data, false);
 
             this.#io.of("/admin").emit("server:log", data.toString());
         });
 
         process.stderr.on("data", (data) => {
-            this.#logs.push({
-                message: data,
-                isError: true
-            });
+            this.#logData(data, true);
 
             this.#io.of("/admin").emit("server:error", data.toString());
         });
@@ -128,6 +124,21 @@ class ServerManager {
         });
 
         return process;
+    }
+
+    /**
+     * Saves server log.
+     *
+     * @param { String } message - Message. 
+     * @param { Boolean? } isError - Is the message an error?
+     */
+    #logData(message, isError = false) {
+        this.#logs.push({
+            message, isError
+        });
+
+        // Trim logs to ensure it does not grow infinitely.
+        this.#logs.slice(-MAX_STORED_LOGS);
     }
 
     /**
