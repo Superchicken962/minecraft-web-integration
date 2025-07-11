@@ -365,19 +365,19 @@ function getRequiredSecretConfigFields() {
  */
 function getRequiredConfigFields() {
     return {
-        "settings.serverUpdateInterval": {desc: "The interval (in seconds) for the server info to be updated on Discord", requiresRestart: false, default: 90},
+        "settings.serverUpdateInterval": {desc: "The interval (in seconds) for the server info to be updated on Discord", requiresRestart: false, default: 90, type: Number},
         "settings.url": {desc: "The website url", requiresRestart: true},
-        "settings.requireLoginForAccess": {desc: "Should users have to login with Discord to use the site?", requiresRestart: true, default: false},
-        "settings.admins": {desc: "Array of discord ids that should be given admin access (must contain at least one id).", requiresRestart: true},
+        "settings.requireLoginForAccess": {desc: "Should users have to login with Discord to use the site?", requiresRestart: true, default: false, type: Boolean},
+        "settings.admins": {desc: "Array of discord ids that should be given admin access (must contain at least one id).", requiresRestart: true, type: Array},
         "server.ip": {desc: "Minecraft server ip", requiresRestart: true, default: "127.0.0.1"},
         "server.port": {desc: "Minecraft server port", requiresRestart: true, default: "25565"},
-        "server.memory": {desc: "Memory to allocate the minecraft server (in gigabytes)", requiresRestart: true, default: 2},
-        "features.discordChatRelay.enabled": {desc: "Enable chat relay between discord and the minecraft server.", requiresRestart: true, default: true},
+        "server.memory": {desc: "Memory to allocate the minecraft server (in gigabytes)", requiresRestart: true, default: 2, type: Number},
+        "features.discordChatRelay.enabled": {desc: "Enable chat relay between discord and the minecraft server.", requiresRestart: true, default: true, type: Boolean},
         "features.discordChatRelay.channelId": {desc: "Channel to use for chat relay - use command mc!relay in a discord channel to set it.", requiresRestart: true, required: false},
-        "features.logging.death": {desc: "Log player deaths?", requiresRestart: true, default: true},
-        "features.logging.join": {desc: "Log player joins?", requiresRestart: true, default: true},
-        "features.logging.disconnect": {desc: "Log player disconnects?", requiresRestart: true, default: true},
-        "features.logging.chat": {desc: "Log player chat?", requiresRestart: true, default: true}
+        "features.logging.death": {desc: "Log player deaths?", requiresRestart: true, default: true, type: Boolean},
+        "features.logging.join": {desc: "Log player joins?", requiresRestart: true, default: true, type: Boolean},
+        "features.logging.disconnect": {desc: "Log player disconnects?", requiresRestart: true, default: true, type: Boolean},
+        "features.logging.chat": {desc: "Log player chat?", requiresRestart: true, default: true, type: Boolean}
     };
 }
 
@@ -564,6 +564,33 @@ async function readJsonFile(path) {
     }
 }
 
+/**
+ * Parses given string config data into an object, converting types using given required fields data.
+ * 
+ * @param { Object } data - Data to parse.
+ * @param { Object } required - Data to compare the fields to, and get types from.
+ */
+function parseConfigFormSaveData(data, required) {
+    const parsed = {};
+
+    for (const [key, val] of Object.entries(data)) {
+        const matchingRequired = required[key];
+        if (!matchingRequired) continue;
+
+        const type = matchingRequired.type || String;
+
+        // Convert to correct type by calling it as a function.
+        let value = type(val);
+
+        // If type is an array, split the value into one.
+        if (type === Array) {
+            value = val.split(",").map(i => i.trim());
+        }
+
+        console.log(key, value);
+    }
+}
+
 module.exports = {
     serverInfo,
     askSocket,
@@ -577,5 +604,6 @@ module.exports = {
     isAdmin,
     readJsonFile,
     convertDotsToNestedObject,
-    getDeepObjectKeys
+    getDeepObjectKeys,
+    parseConfigFormSaveData
 };

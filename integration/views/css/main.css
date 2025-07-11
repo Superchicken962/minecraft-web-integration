@@ -384,3 +384,22 @@ a.link:hover {
     color: grey;
     font-size: 12px;
 }
+
+.saveBtn {
+    width: 90%;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.requestResponse {
+    display: block;
+    margin: auto;
+    margin-bottom: 10px;
+    width: 90%;
+    text-align: center;
+    color: white;
+    box-shadow: none !important;
+}
+.requestResponse:empty {
+    display: none;
+}

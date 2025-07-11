@@ -7,7 +7,8 @@ const config = require("./config.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData } = require("./functions");
+const { requireAdmin } = require("./middleware");
 
 /** @type { Server } */
 let io;
@@ -95,12 +96,7 @@ app.use("*", (req, res, next) => {
     next();
 });
 
-app.get("/configure", async(req, res, next) => {
-    // Only allow non admins to access page if there are no configured admins (prevent "softlock" of new config).
-    if (config?.settings?.admins?.length > 0 && !isAdmin(req.session?.discord?.id)) {
-        return next();
-    }
-
+app.get("/configure", requireAdmin, async(req, res, next) => {
     const cfg = await readJsonFile("config.json");
     const scrt = await readJsonFile("secret.json");
 
@@ -117,6 +113,19 @@ app.get("/configure", async(req, res, next) => {
             config: cfgString
         }
     });
+});
+
+app.post("/configure", requireAdmin, async(req, res) => {
+    const { config, secret} = req.body;
+    
+    if (!config && !secret) {
+        res.sendStatus(400);
+        return;
+    }
+
+    const cfg = parseConfigFormSaveData(config, getRequiredConfigFields());
+
+    res.sendStatus(503);
 });
 
 app.use("*", async(req, res, next) => {
