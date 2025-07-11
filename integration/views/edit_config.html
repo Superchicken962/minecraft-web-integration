@@ -13,8 +13,34 @@
     <div class="misconfigurationMenu">
         <h1>Configure</h1>
 
-        <h3>config.json</h3>
-        <h3>secret.json</h3>
+        <div class="options">
+            <div class="option">
+                <h2 class="label">config.json</h2>
+                <br>
+
+                <% for (const [key, val] of Object.entries(required.config)) { %>
+                    <div class="labeledInput">
+                        <% const existingVal = existing.config[key] %>
+
+                        <input class="input configKey" id="<%= key %>" name="<%= key %>" value="<%= existingVal%>"/>
+                        <label for="<%= key %>"><%= key %> - <span class="hint"><%= val.desc%></span></label>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="option">
+                <h2 class="label">secret.json</h2>
+                <br>
+                <% for (const [key, val] of Object.entries(required.secret)) { %>
+                    <div class="labeledInput">
+                        <% const existingVal = existing.secret[key] %>
+
+                        <input class="input secretKey" id="<%= key %>" name="<%= key %>" value="<%= existingVal%>"/>
+                        <label for="<%= key %>"><%= key %> - <span class="hint"><%= val.desc%></span></label>
+                    </div>
+                <% } %>
+            </div>
+        </div>
     </div>
 </body>
 </html>

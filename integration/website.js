@@ -7,7 +7,7 @@ const config = require("./config.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys } = require("./functions");
 
 /** @type { Server } */
 let io;
@@ -104,14 +104,17 @@ app.get("/configure", async(req, res, next) => {
     const cfg = await readJsonFile("config.json");
     const scrt = await readJsonFile("secret.json");
 
+    const cfgString = await getDeepObjectKeys(cfg);
+    const scrtString = await getDeepObjectKeys(scrt);
+
     res.render("edit_config.html", {
         required: {
             secret: getRequiredSecretConfigFields(),
             config: getRequiredConfigFields()
         },
         existing: {
-            secret: scrt,
-            config: cfg
+            secret: scrtString,
+            config: cfgString
         }
     });
 });

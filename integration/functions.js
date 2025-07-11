@@ -325,17 +325,17 @@ function getAllValuesInObj(obj) {
  * Gets the keys of an object (recurse) - each levels of depth are represented by fullstops.
  * 
  * @param { Object } obj - Object to get keys of.
- * @returns { any[] } List of object keys.
+ * @returns { Promise<Object> } Object of object paths with values.
  */
 async function getDeepObjectKeys(obj) {
     return new Promise((resolve) => {
-        const paths = [];
+        const paths = {};
 
         dotNotes.recurse(obj, (key, value, path) => {
             // Remove the [0] so that array fields are shown as normal.
             path = path.replaceAll("[0]", "");
 
-            paths.push(path);
+            paths[path] = value;
         });
 
         resolve(paths);
@@ -379,6 +379,24 @@ function getRequiredConfigFields() {
         "features.logging.disconnect": {desc: "Log player disconnects?", requiresRestart: true, default: true},
         "features.logging.chat": {desc: "Log player chat?", requiresRestart: true, default: true}
     };
+}
+
+/**
+ * Converts dot notation string key into an object.
+ * 
+ * @param { String } str - String key to convert. 
+ * @param { String } obj - Initial object to add to.
+ * @returns { Object }
+ */
+function convertDotsToNestedObject(str, obj) {
+    if (!obj) obj = {};
+
+    str.split(".").reduce((prev, next) => {
+        prev[next] = prev[next] || {};
+        return prev[next];
+    }, obj);
+
+    return obj;
 }
 
 /**
@@ -439,7 +457,7 @@ async function validateConfigurations() {
             configurations.configFile.valid = true;
 
             const requiredFields = Object.keys(getRequiredConfigFields());
-            const fields = await getDeepObjectKeys(configFields);
+            const fields = Object.keys(await getDeepObjectKeys(configFields));
 
             for (const field of requiredFields) {
                 configurations.configFile.fields[field] = !!fields.find(f => f === field);
@@ -557,5 +575,7 @@ module.exports = {
     discordAuth,
     calculateMemory,
     isAdmin,
-    readJsonFile
+    readJsonFile,
+    convertDotsToNestedObject,
+    getDeepObjectKeys
 };

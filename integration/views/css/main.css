@@ -363,3 +363,24 @@ a.link {
 a.link:hover {
     opacity: 0.8;
 }
+
+.labeledInput {
+    display: block;
+    margin-bottom: 5px;
+}
+.labeledInput .input {
+    display: inline-block;
+    border-radius: 5px;
+    padding: 4px 8px;
+    outline: none;
+    border: none;
+}
+.labeledInput label {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.hint {
+    color: grey;
+    font-size: 12px;
+}
