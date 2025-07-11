@@ -372,6 +372,7 @@ function getRequiredConfigFields() {
         "server.ip": {desc: "Minecraft server ip", requiresRestart: true, default: "127.0.0.1"},
         "server.port": {desc: "Minecraft server port", requiresRestart: true, default: "25565"},
         "server.memory": {desc: "Memory to allocate the minecraft server (in gigabytes)", requiresRestart: true, default: 2, type: Number},
+        "server.pathTo": {desc: "Path to the server .jar file", requiresRestart: true, default: ""},
         "features.discordChatRelay.enabled": {desc: "Enable chat relay between discord and the minecraft server.", requiresRestart: true, default: true, type: Boolean},
         "features.discordChatRelay.channelId": {desc: "Channel to use for chat relay - use command mc!relay in a discord channel to set it.", requiresRestart: true, required: false},
         "features.logging.death": {desc: "Log player deaths?", requiresRestart: true, default: true, type: Boolean},
@@ -379,24 +380,6 @@ function getRequiredConfigFields() {
         "features.logging.disconnect": {desc: "Log player disconnects?", requiresRestart: true, default: true, type: Boolean},
         "features.logging.chat": {desc: "Log player chat?", requiresRestart: true, default: true, type: Boolean}
     };
-}
-
-/**
- * Converts dot notation string key into an object.
- * 
- * @param { String } str - String key to convert. 
- * @param { String } obj - Initial object to add to.
- * @returns { Object }
- */
-function convertDotsToNestedObject(str, obj) {
-    if (!obj) obj = {};
-
-    str.split(".").reduce((prev, next) => {
-        prev[next] = prev[next] || {};
-        return prev[next];
-    }, obj);
-
-    return obj;
 }
 
 /**
@@ -587,7 +570,21 @@ function parseConfigFormSaveData(data, required) {
             value = val.split(",").map(i => i.trim());
         }
 
-        console.log(key, value);
+        dotNotes.create(parsed, key, value);
+    }
+
+    return parsed;
+}
+
+/**
+ * Essentially combines values from two objects into one. Duplicate keys will take value from the foreign object.
+ * 
+ * @param { Object } local - Object to put values into.
+ * @param { Object } foreign - Object to take values from.
+ */
+function combineObjects(local, foreign) {
+    for (const [key, val] of Object.entries(foreign)) {
+        local[key] = val;
     }
 }
 
@@ -603,7 +600,7 @@ module.exports = {
     calculateMemory,
     isAdmin,
     readJsonFile,
-    convertDotsToNestedObject,
     getDeepObjectKeys,
-    parseConfigFormSaveData
+    parseConfigFormSaveData,
+    combineObjects
 };

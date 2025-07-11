@@ -18,12 +18,13 @@
                 <h2 class="label">config.json</h2>
                 <br>
 
+                <%# TODO: Add extra existing values that are not "required." %>
                 <% for (const [key, val] of Object.entries(required.config)) { %>
                     <div class="labeledInput">
                         <% const existingVal = existing.config[key] %>
 
                         <input class="input configKey" id="<%= key %>" name="<%= key %>" value="<%= existingVal%>"/>
-                        <label for="<%= key %>"><%= key %> - <span class="hint"><%= val.desc%></span></label>
+                        <label for="<%= key %>"><%= key %> <span class="hint">- <%= val.desc%></span></label>
                     </div>
                 <% } %>
             </div>
@@ -37,7 +38,7 @@
                         <% const existingVal = existing.secret[key] %>
 
                         <input class="input secretKey" id="<%= key %>" name="<%= key %>" value="<%= existingVal%>"/>
-                        <label for="<%= key %>"><%= key %> - <span class="hint"><%= val.desc%></span></label>
+                        <label for="<%= key %>"><%= key %> <span class="hint">- <%= val.desc%></span></label>
                     </div>
                 <% } %>
             </div>

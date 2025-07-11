@@ -7,7 +7,7 @@ const config = require("./config.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects } = require("./functions");
 const { requireAdmin } = require("./middleware");
 
 /** @type { Server } */
@@ -118,14 +118,28 @@ app.get("/configure", requireAdmin, async(req, res, next) => {
 app.post("/configure", requireAdmin, async(req, res) => {
     const { config, secret} = req.body;
     
-    if (!config && !secret) {
+    if (!config || !secret) {
         res.sendStatus(400);
         return;
     }
 
     const cfg = parseConfigFormSaveData(config, getRequiredConfigFields());
+    const scrt = parseConfigFormSaveData(secret, getRequiredSecretConfigFields());
 
-    res.sendStatus(503);
+    const cfgPath = path.join(__dirname, "config.json");
+    const scrtPath = path.join(__dirname, "secret.json");
+
+    const existingCfg = await readJsonFile(cfgPath);
+    const existingScrt = await readJsonFile(scrtPath);
+
+    // Combine the two (adding changes from new config) - this modifies the existing variables.
+    combineObjects(existingCfg, cfg);
+    combineObjects(existingScrt, scrt);
+
+    await fs.promises.writeFile(cfgPath, JSON.stringify(existingCfg, null, 4), "utf-8");
+    await fs.promises.writeFile(scrtPath, JSON.stringify(existingScrt, null, 4), "utf-8");
+
+    res.sendStatus(200);
 });
 
 app.use("*", async(req, res, next) => {
