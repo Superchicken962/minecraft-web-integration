@@ -170,14 +170,14 @@ public class Functions {
         values.put("log.content", logmessage);
         Date date = new Date();
         values.put("eventTime", Long.toString(date.getTime()));
-        values.put("token", ("socketAuthToken"));
+        values.put("token", this.plugin.getConfig().getString("socketAuthToken"));
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("http://127.0.0.1:80/api/post/log/console"))
+            .uri(URI.create(this.formatSocketUrl("api/post/log/console")))
             .setHeader("Content-Type", "application/json")
             .version(HttpClient.Version.HTTP_1_1)
             .POST(HttpRequest.BodyPublishers.ofString(reqBody))
@@ -199,14 +199,14 @@ public class Functions {
         values.put("message.content", chatMessage); 
         Date date = new Date();
         values.put("eventTime", Long.toString(date.getTime()));
-        values.put("token", "Y+ZdEW3ZiQVGOXaW4gjo2Ikl4SyeeshDFD6Kp2WlqmpoYMAawXSZX7G+Gz9nboBK"); 
+        values.put("token", this.plugin.getConfig().getString("socketAuthToken")); 
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("http://127.0.0.1:80/api/post/log/chat"))
+            .uri(URI.create(this.formatSocketUrl("api/post/log/chat")))
             .setHeader("Content-Type", "application/json")
             .version(HttpClient.Version.HTTP_1_1)
             .POST(HttpRequest.BodyPublishers.ofString(reqBody))
@@ -228,14 +228,14 @@ public class Functions {
         values.put("eventMessage", JoinOrLeaveMessage);
         Date date = new Date();
         values.put("eventTime", Long.toString(date.getTime()));
-        values.put("token", "Y+ZdEW3ZiQVGOXaW4gjo2Ikl4SyeeshDFD6Kp2WlqmpoYMAawXSZX7G+Gz9nboBK"); 
+        values.put("token", this.plugin.getConfig().getString("socketAuthToken")); 
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("http://127.0.0.1:80/api/post/log/"+JoinOrLeave))
+            .uri(URI.create(this.formatSocketUrl("api/post/log/"+JoinOrLeave)))
             .setHeader("Content-Type", "application/json")
             .version(HttpClient.Version.HTTP_1_1)
             .POST(HttpRequest.BodyPublishers.ofString(reqBody))
@@ -261,14 +261,14 @@ public class Functions {
         }
         Date date = new Date();
         values.put("eventTime", Long.toString(date.getTime()));
-        values.put("token", "Y+ZdEW3ZiQVGOXaW4gjo2Ikl4SyeeshDFD6Kp2WlqmpoYMAawXSZX7G+Gz9nboBK"); 
+        values.put("token", this.plugin.getConfig().getString("socketAuthToken")); 
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("http://127.0.0.1:80/api/post/log/player_death"))
+            .uri(URI.create(this.formatSocketUrl("api/post/log/player_death")))
             .setHeader("Content-Type", "application/json")
             .version(HttpClient.Version.HTTP_1_1)
             .POST(HttpRequest.BodyPublishers.ofString(reqBody))
@@ -283,14 +283,14 @@ public class Functions {
 
         Date date = new Date();
         values.put("eventTime", Long.toString(date.getTime()));
-        values.put("token", "Y+ZdEW3ZiQVGOXaW4gjo2Ikl4SyeeshDFD6Kp2WlqmpoYMAawXSZX7G+Gz9nboBK"); 
+        values.put("token", this.plugin.getConfig().getString("socketAuthToken")); 
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("http://127.0.0.1:80/api/post/log/server_start"))
+            .uri(URI.create(this.formatSocketUrl("api/post/log/server_start")))
             .setHeader("Content-Type", "application/json")
             .version(HttpClient.Version.HTTP_1_1)
             .POST(HttpRequest.BodyPublishers.ofString(reqBody))
@@ -313,14 +313,14 @@ public class Functions {
         values.put("event.advancementIcon", AdvancementIconItem);
         Date date = new Date();
         values.put("eventTime", Long.toString(date.getTime()));
-        values.put("token", "Y+ZdEW3ZiQVGOXaW4gjo2Ikl4SyeeshDFD6Kp2WlqmpoYMAawXSZX7G+Gz9nboBK"); 
+        values.put("token", this.plugin.getConfig().getString("socketAuthToken")); 
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("http://127.0.0.1:80/api/post/log/player_advancement"))
+            .uri(URI.create(this.formatSocketUrl("api/post/log/player_advancement")))
             .setHeader("Content-Type", "application/json")
             .version(HttpClient.Version.HTTP_1_1)
             .POST(HttpRequest.BodyPublishers.ofString(reqBody))
@@ -338,14 +338,14 @@ public class Functions {
         values.put("action", action);
         values.put("adminOnly", true);
         values.put("eventTime", Long.toString(date.getTime()));
-        values.put("token", "Y+ZdEW3ZiQVGOXaW4gjo2Ikl4SyeeshDFD6Kp2WlqmpoYMAawXSZX7G+Gz9nboBK");
+        values.put("token", this.plugin.getConfig().getString("socketAuthToken"));
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("http://127.0.0.1:80/api/post/action"))
+            .uri(URI.create(this.formatSocketUrl("api/post/action")))
             .setHeader("Content-type", "application/json")
             .version(HttpClient.Version.HTTP_1_1)
             .POST(HttpRequest.BodyPublishers.ofString(reqBody))
@@ -475,6 +475,11 @@ public class Functions {
 
         Long difference = nowTime - storedTime;
         return difference;
+    }
+    
+    private String formatSocketUrl(String path) {
+    	String port = this.plugin.getConfig().getString("socketPort");
+    	return String.format("http://127.0.0.1:%s/%s", port, path);
     }
 
     // ideas for more stuff:
