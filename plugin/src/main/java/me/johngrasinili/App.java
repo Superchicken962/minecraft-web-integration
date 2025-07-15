@@ -47,32 +47,32 @@ public class App extends JavaPlugin implements Listener {
         instance = this;
 
         getLogger().info("Baby-gamers plugin enabled!");
-        getServer().getPluginManager().registerEvents(new onPlayerJoin(), this);
-        getServer().getPluginManager().registerEvents(new onBlockBreak(), this);
-        getServer().getPluginManager().registerEvents(new onBlockExplode(), this);
-        getServer().getPluginManager().registerEvents(new onBlockPhysChange(), this);
-        getServer().getPluginManager().registerEvents(new onPlayerMove(), this);
-        getServer().getPluginManager().registerEvents(new onChat(), this);
-        getServer().getPluginManager().registerEvents(new onPlayerLeave(), this);
-        getServer().getPluginManager().registerEvents(new onPlayerDeath(), this);
-        getServer().getPluginManager().registerEvents(new onServerLoad(), this);
-        getServer().getPluginManager().registerEvents(new onPlayerAdvancement(), this);
-        getServer().getPluginManager().registerEvents(new onItemCrafted(), this);
+        getServer().getPluginManager().registerEvents(new onPlayerJoin(instance), this);
+        getServer().getPluginManager().registerEvents(new onBlockBreak(instance), this);
+        getServer().getPluginManager().registerEvents(new onBlockExplode(instance), this);
+        getServer().getPluginManager().registerEvents(new onBlockPhysChange(instance), this);
+        getServer().getPluginManager().registerEvents(new onPlayerMove(instance), this);
+        getServer().getPluginManager().registerEvents(new onChat(instance), this);
+        getServer().getPluginManager().registerEvents(new onPlayerLeave(instance), this);
+        getServer().getPluginManager().registerEvents(new onPlayerDeath(instance), this);
+        getServer().getPluginManager().registerEvents(new onServerLoad(instance), this);
+        getServer().getPluginManager().registerEvents(new onPlayerAdvancement(instance), this);
+        getServer().getPluginManager().registerEvents(new onItemCrafted(instance), this);
         // getServer().getPluginManager().registerEvents(new onPlayerDropItem(), this);
-        getServer().getPluginManager().registerEvents(new onEntityDamagedByEntity(), this);
-        getServer().getPluginManager().registerEvents(new onPlayerChangedWorld(), this);
-        getServer().getPluginManager().registerEvents(new onPlayerRespawn(), this);
+        getServer().getPluginManager().registerEvents(new onEntityDamagedByEntity(instance), this);
+        getServer().getPluginManager().registerEvents(new onPlayerChangedWorld(instance), this);
+        getServer().getPluginManager().registerEvents(new onPlayerRespawn(instance), this);
 
-        getCommand("protectBlocks").setExecutor(new protectBlocks());
-        getCommand("clearProtectedBlocks").setExecutor(new clearProtectedBlocks());
-        getCommand("autoBridge").setExecutor(new autoBridge());
-        getCommand("test").setExecutor(new test());
-        getCommand("afk").setExecutor(new toggleAFK());
-        getCommand("jaigame").setExecutor(new jaiGame());
+        getCommand("protectBlocks").setExecutor(new protectBlocks(instance));
+        getCommand("clearProtectedBlocks").setExecutor(new clearProtectedBlocks(instance));
+        getCommand("autoBridge").setExecutor(new autoBridge(instance));
+        getCommand("test").setExecutor(new test(instance));
+        getCommand("afk").setExecutor(new toggleAFK(instance));
+        getCommand("jaigame").setExecutor(new jaiGame(instance));
 
         this.saveDefaultConfig();
 
-        Functions Function = new Functions();
+        Functions Function = new Functions(instance);
 
         World JaiGameWorld = Bukkit.createWorld(new WorldCreator("jaigame")); // create the jaigame world
         JaiGameWorld.setGameRule(GameRule.KEEP_INVENTORY, true); // make sure this is true, I fucked up and lost my armour and enchanted swords...

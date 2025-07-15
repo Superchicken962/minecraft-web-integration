@@ -8,14 +8,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
 
 public class onPlayerDeath implements Listener {
+	private Functions Function = null;
+	
+	public onPlayerDeath(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
+
     @EventHandler
     public void playerDeath(PlayerDeathEvent event) throws IOException, InterruptedException, URISyntaxException {
-        Functions Function = new Functions();
-
         Player player = event.getEntity();
         Player killer = player.getKiller();
 

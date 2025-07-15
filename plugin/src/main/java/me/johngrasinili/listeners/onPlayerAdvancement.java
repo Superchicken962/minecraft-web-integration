@@ -8,14 +8,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
+import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
 
 public class onPlayerAdvancement implements Listener {
+	private Functions Function = null;
+	
+	public onPlayerAdvancement(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
+	
     @EventHandler
     public void onAdvancementUnlock(PlayerAdvancementDoneEvent event) throws IOException, InterruptedException, URISyntaxException {
-        Functions Function = new Functions();
-
         Player player = event.getPlayer();
 
         URI playerskinurl = event.getPlayer().getPlayerProfile().getTextures().getSkin().toURI();

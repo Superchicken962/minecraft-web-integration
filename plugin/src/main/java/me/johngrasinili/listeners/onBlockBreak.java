@@ -7,12 +7,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
 import net.md_5.bungee.api.ChatColor;
 
 public class onBlockBreak implements Listener {
-    Functions Function = new Functions();
+	private Plugin plugin = null;
+	private Functions Function = null;
+	
+	public onBlockBreak(Plugin plugin) {
+		this.plugin = plugin;
+		Function = new Functions(plugin);
+	}
     
     @EventHandler
     public void onBreakBlock(BlockBreakEvent event) {

@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.App;
 import me.johngrasinili.Functions;
@@ -14,12 +15,15 @@ import me.johngrasinili.classes.playerLocation;
 import me.johngrasinili.classes.taskToComplete;
 
 public class jaiGame implements CommandExecutor {
+	private Functions Function = null;
+	
+	public jaiGame(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Player p = (Player) sender;
-
-        Functions Function = new Functions();
 
         p.sendMessage(""+ChatColor.BLUE+p.getWorld().getName());
 

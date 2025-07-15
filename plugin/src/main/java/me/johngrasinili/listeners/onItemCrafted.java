@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.plugin.Plugin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -12,10 +13,14 @@ import me.johngrasinili.classes.PlayerAction;
 import me.johngrasinili.classes.playerInfo;
 
 public class onItemCrafted implements Listener {
+	private Functions Function = null;
+	
+	public onItemCrafted(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
+	
     @EventHandler
     public void itemCrafted(CraftItemEvent event) throws JsonProcessingException {
-        Functions Function = new Functions();
-
         String result = event.getRecipe().getResult().getType().toString();
         int amount = event.getRecipe().getResult().getAmount();
 

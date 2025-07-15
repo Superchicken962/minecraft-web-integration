@@ -7,8 +7,15 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 public class toggleAFK implements CommandExecutor {
+	private Functions Function = null;
+	
+	public toggleAFK(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
+	
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
@@ -18,8 +25,6 @@ public class toggleAFK implements CommandExecutor {
         }
 
         Player player = (Player) sender;
-
-        Functions Function = new Functions();
         
         UUID playeruuid = player.getUniqueId();
         Boolean isAfk = Function.isPlayerAFK(playeruuid);

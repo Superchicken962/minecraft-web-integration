@@ -4,11 +4,17 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
 
 public class onBlockPhysChange implements Listener {
-    Functions Function = new Functions();
+	private Functions Function = null;
+	
+	public onBlockPhysChange(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
+
 
     @EventHandler
     public void onBlockPhysicsChange(BlockPhysicsEvent event) {

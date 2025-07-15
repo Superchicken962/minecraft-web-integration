@@ -6,8 +6,17 @@ import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.plugin.Plugin;
+
+import me.johngrasinili.Functions;
 
 public class onPlayerDropItem implements Listener {
+	private Functions Function = null;
+	
+	public onPlayerDropItem(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
+	
     @EventHandler
     public void playerDropItem(PlayerDropItemEvent event) throws InterruptedException {
         Item item = event.getItemDrop();

@@ -103,6 +103,15 @@ app.get("/configure", requireAdmin, async(req, res, next) => {
     const cfgString = await getDeepObjectKeys(cfg);
     const scrtString = await getDeepObjectKeys(scrt);
 
+	// TODO: Finish this, make util function.
+	// Check for any array types, and change it to have an array in text, rather than [0] and [1] after name.
+	const cfgWithArray = Object.entries(cfgString).filter(v => v[0].endsWith("]"));
+	for (const [name, value] of cfgWithArray) {
+		const plainName = name.split("[")[0];
+		cfgString[plainName] = cfgString[plainName] || [];
+		cfgString[plainName].push(value);
+	}
+
     res.render("edit_config.html", {
         required: {
             secret: getRequiredSecretConfigFields(),
@@ -142,6 +151,13 @@ app.post("/configure", requireAdmin, async(req, res) => {
     res.sendStatus(200);
 });
 
+app.use("/login", require("./auth"));
+app.get(["/logout", "/signout"], (req, res) => {
+    req.session.destroy(() => {
+        res.redirect("/");
+    });
+});
+
 app.use("*", async(req, res, next) => {
     const configurations = await validateConfigurations();
 
@@ -151,13 +167,6 @@ app.use("*", async(req, res, next) => {
     }
 
     next();
-});
-
-app.use("/login", require("./auth"));
-app.get(["/logout", "/signout"], (req, res) => {
-    req.session.destroy(() => {
-        res.redirect("/");
-    });
 });
 
 app.use("/manage", require("./manage"));
@@ -243,149 +252,158 @@ const recentLogs = [];
 
 app.post("/api/post/log/:type", (req, res) => {
     var type = req.params.type;
-    var token = req.body.token;
-    var recievetime = new Date();
+    const token = req.body.token;
+    const recieveTime = new Date();
     if (token !== secret.socketAuthToken) {
-        console.log("["+recievetime.toLocaleTimeString()+`] API Request Rejected! (Token doesn't match!) AT ${req.path}`);
+        console.log("["+recieveTime.toLocaleTimeString()+`] API Request Rejected! (Token doesn't match!) AT ${req.path}`);
         res.sendStatus(401);
         return;
     }
 
-    if (type === "chat") {
-        res.sendStatus(200); // acknowledge
+    console.log("Receieved log!");
 
-        var log = {
-            sender: {
-                username: req.body["message.sender.username"],
-                ip: req.body["message.sender.ip"],
-                ping: req.body["message.sender.ping"],
-                isOperator: req.body["message.sender.isOp"],
-                avatarUrl: req.body["message.sender.skinUrl"]
-            },
-            message: {
-                content: req.body["message.content"]
-            },
-            event: {
-                type: type,
-                time: req.body["eventTime"],
-            }
-        };
-        io.emit("log:chat", log);
-        recentLogs.push(log);
-        discord.sendToLogsChannel(type, log);
+    switch(type) {
+        case "chat":
+            res.sendStatus(200);
 
-        return;
-    } else if (type === "console") {
-        res.sendStatus(200); // acknowledge
-
-        var log = {
-            log: {
-                content: req.body["log.content"]
-            },
-            event: {
-                type: type,
-                time: req.body["eventTime"]
-            }
-        };
-        // Send to admin namespace.
-        io.of("/admin").emit("log:console", log);
-        recentLogs.push(log);
-
-        return;
-    } else if (type === "join" || type === "leave") {
-        res.sendStatus(200); // acknowledge
-
-        var log = {
-            player: {
-                username: req.body["player.username"],
-                ip: req.body["player.ip"],
-                ping: req.body["player.ping"],
-                isOperator: req.body["player.isOp"],
-                avatarUrl: req.body["player.skinUrl"]
-            },
-            event: {
-                type: type,
-                time: req.body["eventTime"],
-                message: req.body["eventMessage"]
-            }
-        };
-        io.emit("log:playerjoinorleave", log);
-        recentLogs.push(log);
-        discord.sendToLogsChannel(type, log);
-
-        return;
-    } else if (type === "player_death") {
-        res.sendStatus(200); // acknowledge
-
-        var log = {
-            player: {
-                username: req.body["player.username"],
-                ping: req.body["player.ping"],
-                isOperator: req.body["player.isOp"],
-                avatarUrl: req.body["player.skinUrl"]
-            },
-            killer: {
-                username: req.body["killer.username"],
-                ping: req.body["killer.ping"],
-                isOperator: req.body["killer.isOp"]
-            },
-            event: {
-                type: type,
-                time: req.body["eventTime"],
-                deathMessage: req.body["deathMessage"]
-            }
-        };
-
-        io.emit("log:playerdeath", log);
-        recentLogs.push(log);
-        discord.sendToLogsChannel(type, log);
-
-        return;
-    } else if (type === "server_start") {
-        res.sendStatus(200); // acknowledge
-
-        var log = {
-            event: {
-                type: type,
-                time: req.body["eventTime"],
-                message: "Server is now online!"
-            }
-        };
-
-        io.emit("log:serverstart", log);
-        recentLogs.push(log);
-        discord.sendToLogsChannel(type, log);
-
-        return;
-    } else if (type === "player_advancement") {
-        res.sendStatus(200); // acknowledge
-
-        var log = {
-            player: {
-                username: req.body["player.username"],
-                ip: req.body["player.ip"],
-                ping: req.body["player.ping"],
-                isOperator: req.body["player.isOp"],
-                avatarUrl: req.body["player.skinUrl"]
-            },
-            event: {
-                type: type,
-                time: req.body["eventTime"],
-                advancement: {
-                    name: req.body["event.advancementName"],
-                    description: req.body["event.advancementDesc"],
-                    icon: req.body["event.advancementIcon"]
+            var log = {
+                sender: {
+                    username: req.body["message.sender.username"],
+                    ip: req.body["message.sender.ip"],
+                    ping: req.body["message.sender.ping"],
+                    isOperator: req.body["message.sender.isOp"],
+                    avatarUrl: req.body["message.sender.skinUrl"]
+                },
+                message: {
+                    content: req.body["message.content"]
+                },
+                event: {
+                    type: type,
+                    time: req.body["eventTime"],
                 }
-            }
-        };
+            };
 
-        io.emit("log:playeradvancement", log);
-        recentLogs.push(log);
-        discord.sendToLogsChannel(type, log);
+            io.emit("log:chat", log);
+            recentLogs.push(log);
+            discord.sendToLogsChannel(type, log);
 
-    } else {
-        res.sendStatus(404);
-        return;
+            break;
+
+        case "console":
+            res.sendStatus(200);
+
+            var log = {
+                log: {
+                    content: req.body["log.content"]
+                },
+                event: {
+                    type: type,
+                    time: req.body["eventTime"]
+                }
+            };
+
+            // Send to admin namespace.
+            io.of("/admin").emit("log:console", log);
+            recentLogs.push(log);
+            break;
+
+        case "join":
+        case "leave":
+            res.sendStatus(200);
+
+            var log = {
+                player: {
+                    username: req.body["player.username"],
+                    ip: req.body["player.ip"],
+                    ping: req.body["player.ping"],
+                    isOperator: req.body["player.isOp"],
+                    avatarUrl: req.body["player.skinUrl"]
+                },
+                event: {
+                    type: type,
+                    time: req.body["eventTime"],
+                    message: req.body["eventMessage"]
+                }
+            };
+
+            io.emit("log:playerjoinorleave", log);
+            recentLogs.push(log);
+            discord.sendToLogsChannel(type, log);
+            break;
+
+        case "player_death":
+            res.sendStatus(200);
+
+            var log = {
+                player: {
+                    username: req.body["player.username"],
+                    ping: req.body["player.ping"],
+                    isOperator: req.body["player.isOp"],
+                    avatarUrl: req.body["player.skinUrl"]
+                },
+                killer: {
+                    username: req.body["killer.username"],
+                    ping: req.body["killer.ping"],
+                    isOperator: req.body["killer.isOp"]
+                },
+                event: {
+                    type: type,
+                    time: req.body["eventTime"],
+                    deathMessage: req.body["deathMessage"]
+                }
+            };
+
+            io.emit("log:playerdeath", log);
+            recentLogs.push(log);
+            discord.sendToLogsChannel(type, log);
+            break;
+
+        case "server_start":
+            res.sendStatus(200);
+
+            var log = {
+                event: {
+                    type: type,
+                    time: req.body["eventTime"],
+                    message: "Server is now online!"
+                }
+            };
+
+            io.emit("log:serverstart", log);
+            recentLogs.push(log);
+            discord.sendToLogsChannel(type, log);
+            break;
+
+        case "player_advancement":
+            res.sendStatus(200);
+
+            var log = {
+                player: {
+                    username: req.body["player.username"],
+                    ip: req.body["player.ip"],
+                    ping: req.body["player.ping"],
+                    isOperator: req.body["player.isOp"],
+                    avatarUrl: req.body["player.skinUrl"]
+                },
+                event: {
+                    type: type,
+                    time: req.body["eventTime"],
+                    advancement: {
+                        name: req.body["event.advancementName"],
+                        description: req.body["event.advancementDesc"],
+                        icon: req.body["event.advancementIcon"]
+                    }
+                }
+            };
+
+            io.emit("log:playeradvancement", log);
+            recentLogs.push(log);
+            discord.sendToLogsChannel(type, log);
+            break;
+
+        default:
+            res.sendStatus(404);
+            break;
     }
 });
 
@@ -396,7 +414,7 @@ app.post("/api/post/action", (req, res) =>  {
         action: req.body.action
     };
     io.emit("action:*", action);
-    res.sendStatus(200); // acknowledge
+    res.sendStatus(200);
 });
 
 var stats = {};
@@ -426,42 +444,42 @@ function initSocketListeners(socketInstance) {
         console.log("event", data);
     });
 
-    setInterval(() => {
-        const log = {
-            sender: {
-                username: "mark",
-                ip: "127.0.0.1",
-                ping: "0",
-                isOperator: "true",
-                avatarUrl: "https://minotar.net/avatar/069a79f444e94726a5befca90e38aaf5/64"
-            },
-            message: {
-                content: "Test"
-            },
-            event: {
-                type: "chat",
-                time: Date.now(),
-            }
-        };
-        io.emit("log:chat", log);
-    }, 9000);
+    // setInterval(() => {
+    //     const log = {
+    //         sender: {
+    //             username: "mark",
+    //             ip: "127.0.0.1",
+    //             ping: "0",
+    //             isOperator: "true",
+    //             avatarUrl: "https://minotar.net/avatar/069a79f444e94726a5befca90e38aaf5/64"
+    //         },
+    //         message: {
+    //             content: "Test"
+    //         },
+    //         event: {
+    //             type: "chat",
+    //             time: Date.now(),
+    //         }
+    //     };
+    //     io.emit("log:chat", log);
+    // }, 9000);
 
-    setInterval(() => {
-        io.emit("log:playerjoinorleave", {
-            player: {
-                username: "mark",
-                ip: "127.0.0.1",
-                ping: "0",
-                isOperator: "true",
-                avatarUrl: "https://minotar.net/avatar/069a79f444e94726a5befca90e38aaf5/64"
-            },
-            event: {
-                type: "join",
-                time: Date.now(),
-                message: "%p has left the game"
-            }
-        });
-    }, 5000);
+    // setInterval(() => {
+    //     io.emit("log:playerjoinorleave", {
+    //         player: {
+    //             username: "mark",
+    //             ip: "127.0.0.1",
+    //             ping: "0",
+    //             isOperator: "true",
+    //             avatarUrl: "https://minotar.net/avatar/069a79f444e94726a5befca90e38aaf5/64"
+    //         },
+    //         event: {
+    //             type: "join",
+    //             time: Date.now(),
+    //             message: "%p has left the game"
+    //         }
+    //     });
+    // }, 5000);
 }
 
 exports.router = app;

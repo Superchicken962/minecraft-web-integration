@@ -6,11 +6,18 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
 import net.md_5.bungee.api.ChatColor;
 
 public class autoBridge implements CommandExecutor {
+	private Functions Function = null;
+	
+	public autoBridge(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
+	
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
@@ -21,8 +28,6 @@ public class autoBridge implements CommandExecutor {
 
         Player player = (Player) sender;
         UUID playerid = player.getUniqueId();
-
-        Functions Function = new Functions();
 
         if (Function.getPlayerAutoBridge(playerid) == null) {
             Function.setPlayerAutoBridge(playerid, true);

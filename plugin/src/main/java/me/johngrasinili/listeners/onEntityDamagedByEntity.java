@@ -5,16 +5,22 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
 import net.md_5.bungee.api.ChatColor;
 
 public class onEntityDamagedByEntity implements Listener {
+	private Functions Function = null;
+	
+	public onEntityDamagedByEntity(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
+	
     @EventHandler
     public void entityDamaged(EntityDamageByEntityEvent event) {
         Entity damager = event.getDamager();
         if (damager instanceof Player) {
-            Functions Function = new Functions();
             if (!Function.isPlayerAFK(damager.getUniqueId())) return; // do nothing if attacker is not afk
 
             Function.removePlayerFromAFK(damager.getUniqueId()); // remove afk status of attacker

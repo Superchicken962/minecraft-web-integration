@@ -18,7 +18,10 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.scoreboard.Team.Option;
@@ -48,9 +51,14 @@ public class Functions {
     Team afkTeam = DataStorage.team_AFK;
     Team JaiGameTeam = DataStorage.team_JaiGame;
     Scoreboard scoreboard = DataStorage.scoreboard;
+    
+    private Plugin plugin = null;
+    public Functions(Plugin plugin) {
+    	this.plugin = plugin;
+    }
 
     public Scoreboard getScoreboard() {
-        return scoreboard;
+    	return scoreboard;
     }
 
     public void setProtectedBlock(Block block, Boolean value) {
@@ -162,7 +170,7 @@ public class Functions {
         values.put("log.content", logmessage);
         Date date = new Date();
         values.put("eventTime", Long.toString(date.getTime()));
-        values.put("token", "Y+ZdEW3ZiQVGOXaW4gjo2Ikl4SyeeshDFD6Kp2WlqmpoYMAawXSZX7G+Gz9nboBK"); 
+        values.put("token", ("socketAuthToken"));
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);

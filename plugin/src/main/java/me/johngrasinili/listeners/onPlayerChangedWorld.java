@@ -6,18 +6,23 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import me.johngrasinili.Functions;
 
 public class onPlayerChangedWorld implements Listener {
+	private Functions Function = null;
+	
+	public onPlayerChangedWorld(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
+	
     @EventHandler 
     public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
         Player p = event.getPlayer();
         World joiningWorld = p.getWorld();
-
-        Functions Function = new Functions();
 
         if (joiningWorld.getName().equals("jaigame")) {
             Function.joinJaiGameTeam(p.getUniqueId());

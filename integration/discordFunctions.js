@@ -3,7 +3,7 @@ const fetch = require("node-fetch");
 
 function sendToLogsChannel(type, log) {
     var webhookURL = require("./config.json").webhookURL;
-    var parameters = {
+    const parameters = {
         username: "Unhandled Event",
         avatar_url: "",
         content: `The '${type}' event is being sent but not handled!`

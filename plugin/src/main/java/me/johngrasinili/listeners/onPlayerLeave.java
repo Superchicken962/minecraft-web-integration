@@ -8,12 +8,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
 
 public class onPlayerLeave implements Listener {
+	private Functions Function = null;
+	
+	public onPlayerLeave(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
+	
     @EventHandler
     public void onLeave(PlayerQuitEvent event) throws IOException, InterruptedException, URISyntaxException {
-        Functions Function = new Functions();
-        
         Player player = event.getPlayer();
         URI senderSkinUrl = player.getPlayerProfile().getTextures().getSkin().toURI();
 

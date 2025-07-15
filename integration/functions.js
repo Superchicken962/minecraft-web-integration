@@ -333,7 +333,7 @@ async function getDeepObjectKeys(obj) {
 
         dotNotes.recurse(obj, (key, value, path) => {
             // Remove the [0] so that array fields are shown as normal.
-            path = path.replaceAll("[0]", "");
+            //path = path.replaceAll("[0]", "");
 
             paths[path] = value;
         });
@@ -358,6 +358,10 @@ function getRequiredSecretConfigFields() {
     };
 }
 
+function BooleanConvert(value) {
+	return !!value && value != "false";
+}
+
 /**
  * Get a key value pair of fields that are required in config.json for the app to work. Key is field name, and value is a short description.
  * 
@@ -367,18 +371,18 @@ function getRequiredConfigFields() {
     return {
         "settings.serverUpdateInterval": {desc: "The interval (in seconds) for the server info to be updated on Discord", requiresRestart: false, default: 90, type: Number},
         "settings.url": {desc: "The website url", requiresRestart: true},
-        "settings.requireLoginForAccess": {desc: "Should users have to login with Discord to use the site?", requiresRestart: true, default: false, type: Boolean},
-        "settings.admins": {desc: "Array of discord ids that should be given admin access (must contain at least one id).", requiresRestart: true, type: Array},
+        "settings.requireLoginForAccess": {desc: "Should users have to login with Discord to use the site?", requiresRestart: true, default: false, type: BooleanConvert},
+        "settings.admins": {desc: "Discord ids that should be given admin access - separated by commas (must contain at least one id).", requiresRestart: true, type: Array},
         "server.ip": {desc: "Minecraft server ip", requiresRestart: true, default: "127.0.0.1"},
         "server.port": {desc: "Minecraft server port", requiresRestart: true, default: "25565"},
         "server.memory": {desc: "Memory to allocate the minecraft server (in gigabytes)", requiresRestart: true, default: 2, type: Number},
         "server.pathTo": {desc: "Path to the server .jar file", requiresRestart: true, default: ""},
-        "features.discordChatRelay.enabled": {desc: "Enable chat relay between discord and the minecraft server.", requiresRestart: true, default: true, type: Boolean},
+        "features.discordChatRelay.enabled": {desc: "Enable chat relay between discord and the minecraft server.", requiresRestart: true, default: true, type: BooleanConvert},
         "features.discordChatRelay.channelId": {desc: "Channel to use for chat relay - use command mc!relay in a discord channel to set it.", requiresRestart: true, required: false},
-        "features.logging.death": {desc: "Log player deaths?", requiresRestart: true, default: true, type: Boolean},
-        "features.logging.join": {desc: "Log player joins?", requiresRestart: true, default: true, type: Boolean},
-        "features.logging.disconnect": {desc: "Log player disconnects?", requiresRestart: true, default: true, type: Boolean},
-        "features.logging.chat": {desc: "Log player chat?", requiresRestart: true, default: true, type: Boolean}
+        "features.logging.death": {desc: "Log player deaths?", requiresRestart: true, default: true, type: BooleanConvert},
+        "features.logging.join": {desc: "Log player joins?", requiresRestart: true, default: true, type: BooleanConvert},
+        "features.logging.disconnect": {desc: "Log player disconnects?", requiresRestart: true, default: true, type: BooleanConvert},
+        "features.logging.chat": {desc: "Log player chat?", requiresRestart: true, default: true, type: BooleanConvert}
     };
 }
 
@@ -443,7 +447,8 @@ async function validateConfigurations() {
             const fields = Object.keys(await getDeepObjectKeys(configFields));
 
             for (const field of requiredFields) {
-                configurations.configFile.fields[field] = !!fields.find(f => f === field);
+                // Split at [ so that array types are checked properly.
+                configurations.configFile.fields[field] = !!fields.find(f => f.split("[")[0] === field);
             }
 
         } catch (error) {

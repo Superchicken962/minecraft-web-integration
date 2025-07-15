@@ -8,14 +8,19 @@ import java.net.URISyntaxException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
 
 public class onChat implements Listener {
+	private Functions Function = null;
+	
+	public onChat(Plugin plugin) {
+		Function = new Functions(plugin);
+	}
+
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) throws IOException, InterruptedException, URISyntaxException {
-
-        Functions Function = new Functions();
 
         String message = event.getMessage();
         String senderName = event.getPlayer().getName();
