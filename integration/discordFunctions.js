@@ -1,8 +1,14 @@
-const { Colors } = require("discord.js");
+const { Colors, Message } = require("discord.js");
 const fetch = require("node-fetch");
+const { serverInfo } = require("./functions");
 
 function sendToLogsChannel(type, log) {
-    var webhookURL = require("./config.json").webhookURL;
+    const webhookURL = require("./secret.json")?.webhookURL;
+    if (!webhookURL) {
+        console.warn("Webhook URL not provided!");
+        return;
+    }
+
     const parameters = {
         username: "Unhandled Event",
         avatar_url: "",
@@ -93,9 +99,52 @@ function sendToLogsChannel(type, log) {
             "content-type": "application/json"
         },
         body: JSON.stringify(parameters)
-    }).then((a) => {
-        // console.log(a);
     });
 }
 
-module.exports = { sendToLogsChannel };
+/**
+ * Runs a command from a discord chat message.
+ * 
+ * @param { Message } message - Chat message.
+ * @returns { Promise<Boolean> } Was a valid command found and run?
+ */
+async function runCommand(message) {
+    // This command will create a new message for updating and store it in config.
+    if (message.content.startsWith("mc!here")) {
+        message.delete();
+
+        const sentMsg = await serverInfo.sendMessage(message.channel);
+
+        // Store current channel id in config.
+        cfg.message = {
+            channelId: message.channel.id,
+            messageId: sentMsg.id
+        };
+        
+        serverInfo.updateConfig(cfg);
+        return true;
+    } else if (message.content.startsWith("mc!relay")) {
+        // Ensure the parent objects have been made before setting. TODO: Make this into a function.
+        cfg.features = (cfg.features || {});
+        cfg.features.discordChatRelay = (cfg.features.discordChatRelay || {});
+
+        cfg.features.discordChatRelay.channelId = message.channel.id;
+
+        await serverInfo.updateConfig(cfg);
+
+        const reply = await message.reply({
+            "content": "Discord chat relay will now use this channel!"
+        });
+
+        setTimeout(() => {
+            message.delete();
+            reply.delete();
+        }, 3000);
+
+        return true;
+    }
+
+    return false;
+}
+
+module.exports = { sendToLogsChannel, runCommand };

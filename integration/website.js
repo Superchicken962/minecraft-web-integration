@@ -214,8 +214,8 @@ app.get("/logs", (req, res) => {
         auth = req.session.auth;
     }
 
-    var pastlogs = (recentLogs.slice(-20)); // get last 15 logs in the array
-    res.render("logs.html", {recentLogs: pastlogs, viewmode: viewmode, auth: auth});
+    const pastLogs = (recentLogs.slice(-20)); // get last 15 logs in the array
+    res.render("logs.html", {recentLogs: pastLogs, viewmode: viewmode, auth: auth});
 });
 
 app.get("/mode/:mode", (req, res) => {

@@ -81,40 +81,19 @@ public class App extends JavaPlugin implements Listener {
         Function.addOnlinePlayersToScoreboard();
 
         // Add the auth token from the config to the socket.
-        Function.socket.setAuthToken(this.getConfig().getString("socketAuthToken", ""));
-
-        Function.socket.listen("discordChatRelay", (Object... args) -> {
-            JSONObject response = (JSONObject) args[0];
-
-            String username;
-            String message;
-            String authToken;
-
-            try {
-                username = response.getString("username");
-                message = response.getString("message");
-                authToken = response.getString("authToken");
-            } catch (JSONException ex) {
-                return;
-            }
-
-            // Check the given token against the token in the config.
-            String socketToken = this.getConfig().getString("socketAuthToken");
-            if (!authToken.equals(socketToken)) return;
-
-            Function.sendFakeChatMessage(username, message);
-        });
-
+        Function.socket.setAuthToken(this.getConfig().getString("socketAuthToken"));
 
         Function.socket.listen("askServer", (Object... args) -> {
             try {
                 JSONObject response = (JSONObject) args[0];
                 
-                String eventName;
-                String id;
-
-                eventName = response.getString("event");
-                id = response.getString("id");
+                String eventName = response.getString("event");
+                String id = response.getString("id");
+                String authToken = response.getString("authToken");
+                
+                // Dismiss message if it doesn't contain 
+	            String socketToken = this.getConfig().getString("socketAuthToken");
+	            if (!authToken.equals(socketToken)) return;
 
                 JSONObject dataToRespond = new JSONObject();
 
@@ -123,9 +102,9 @@ public class App extends JavaPlugin implements Listener {
                 // TODO: Consider expanding this into a callback based system, where we can add events with a function rather than adding into a switch.
 
                 // Add different data depending on the event called.
-                switch(eventName) {
+                switch(eventName.toLowerCase()) {
                     // Find all online players and add to response data.
-                    case "getOnlinePlayers":
+                    case "getonlineplayers":
                         JSONArray players = new JSONArray();
                         
                         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -141,7 +120,7 @@ public class App extends JavaPlugin implements Listener {
                         dataToRespond.put("onlinePlayers", players);
                         break;
 
-                    case "getPlayerStats":
+                    case "getplayerstats":
                         JSONObject allPlayers = new JSONObject();
 
                         // Loop through offline players and get values for all stats.
@@ -161,6 +140,14 @@ public class App extends JavaPlugin implements Listener {
 
                         dataToRespond.put("allPlayers", allPlayers);
                         break;
+                        
+                    case "discordchatrelay":
+                        String username = response.getString("username");
+                        String message = response.getString("message");
+                        
+                        Function.sendFakeChatMessage(username, message);
+                        dataToRespond.put("success", true);
+                    	break;
                 }
 
                 Function.socket.emit("askServer:response", dataToRespond);

@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const config = require("./config.json");
 const { default: axios } = require("axios");
 const dotNotes = require("dot-notes");
+const secret = require("./secret.json");
 
 const serverInfo = {
     readConfig: async function() {
@@ -188,7 +189,7 @@ const serverInfo = {
             "content": "",
             "embeds": [
                 {
-                    "title": (server.name || "A Minecraft Server"),
+                    "title": (server.name ?? "A Minecraft Server"),
                     "footer": {
                         "text": `${cfg.server.ip}:${cfg.server.port}`
                     },
@@ -249,6 +250,7 @@ const askSocket = {
         }
     
         if (!data.id) data.id = randomCode(16);
+        if (!data.authToken) data.authToken = secret.socketAuthToken;
     
         this.socketAwaitingResponse[data.id] = {
             callback

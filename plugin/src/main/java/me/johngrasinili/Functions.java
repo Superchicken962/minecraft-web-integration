@@ -451,7 +451,7 @@ public class Functions {
     }
 
     public void sendFakeChatMessage(String username, String content) {
-        String message = String.format("<%s> %s", username, content);
+        String message = String.format("<[Discord] %s> %s", username, content);
 
         Bukkit.getServer().broadcastMessage(message);
     }

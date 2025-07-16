@@ -2,7 +2,7 @@
     "settings": {
         "serverUpdateInterval": 90,
         "url": "http://127.0.0.1:3003/",
-        "requireLoginForAccess": true,
+        "requireLoginForAccess": false,
         "admins": [
             "406973124719149056"
         ]
