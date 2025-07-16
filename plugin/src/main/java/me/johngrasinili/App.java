@@ -119,7 +119,7 @@ public class App extends JavaPlugin implements Listener {
                         
                         dataToRespond.put("onlinePlayers", players);
                         break;
-
+ 
                     case "getplayerstats":
                         JSONObject allPlayers = new JSONObject();
 

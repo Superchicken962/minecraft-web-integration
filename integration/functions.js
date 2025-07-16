@@ -110,8 +110,6 @@ const serverInfo = {
             return;
         }
 
-        console.log(server);
-
         const embedFields = [];
 
         embedFields.push({
@@ -143,7 +141,6 @@ const serverInfo = {
             await new Promise((resolve) => {
     
                 askSocket.askServer(io.of("/server"), "getOnlinePlayers", (data) => {
-                    console.log("!! Got online players", data);
                     embedPlayerFields.length = 0;
 
                     const playerNames = [];

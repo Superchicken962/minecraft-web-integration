@@ -51,7 +51,7 @@ exports.register = function(socketIo) {
         }
     });
 
-    initSocketListeners(io.of("/server"));
+    initSocketListeners(io);
 }
 
 app.get(["/js/*", "/css/*"], (req, res, next) => {    
@@ -259,8 +259,6 @@ app.post("/api/post/log/:type", (req, res) => {
         res.sendStatus(401);
         return;
     }
-
-    console.log("Receieved log!");
 
     switch(type) {
         case "chat":

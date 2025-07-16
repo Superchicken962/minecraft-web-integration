@@ -332,7 +332,7 @@ p.label.valid {
     margin-top: 5px;
 }
 
-.log .joinLeave {
+.log .joinLeave, .log .advancement {
     display: block;
     margin: auto;
     width: 95%;
@@ -436,4 +436,8 @@ a.link:hover {
 }
 .requestResponse:empty {
     display: none;
+}
+
+.advancementName {
+    color: rgb(84, 252, 84);
 }

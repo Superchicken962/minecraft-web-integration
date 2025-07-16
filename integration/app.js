@@ -44,6 +44,8 @@ app.use("/", web.router);
 
 
 client.on("messageCreate", async(message) => {
+    if (message.author.bot) return;
+
     const cfg = await serverInfo.readConfig();
     
     // If user is an admin, try running the command and if it is valid then do not go to log the message.
@@ -57,7 +59,6 @@ client.on("messageCreate", async(message) => {
 
     // Ensure it is in the right channel
     if (cfg.features?.discordChatRelay?.channelId !== message.channelId) return;
-    if (message.author.bot) return;
 
     io.of("/server").emit("discordChatRelay", {
         username: message.author.username,
