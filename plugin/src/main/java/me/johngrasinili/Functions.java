@@ -175,15 +175,7 @@ public class Functions {
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(this.formatSocketUrl("api/post/log/console")))
-            .setHeader("Content-Type", "application/json")
-            .version(HttpClient.Version.HTTP_1_1)
-            .POST(HttpRequest.BodyPublishers.ofString(reqBody))
-            .build();
-
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        this.sendPostRequest(URI.create(this.formatSocketUrl("api/post/log/console")), reqBody);
 
     }
 
@@ -203,16 +195,8 @@ public class Functions {
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(this.formatSocketUrl("api/post/log/chat")))
-            .setHeader("Content-Type", "application/json")
-            .version(HttpClient.Version.HTTP_1_1)
-            .POST(HttpRequest.BodyPublishers.ofString(reqBody))
-            .build();
-
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        
+        this.sendPostRequest(URI.create(this.formatSocketUrl("api/post/log/chat")), reqBody);
 
     }
 
@@ -232,16 +216,8 @@ public class Functions {
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(this.formatSocketUrl("api/post/log/"+JoinOrLeave)))
-            .setHeader("Content-Type", "application/json")
-            .version(HttpClient.Version.HTTP_1_1)
-            .POST(HttpRequest.BodyPublishers.ofString(reqBody))
-            .build();
-
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        
+        this.sendPostRequest(URI.create(this.formatSocketUrl("api/post/log/"+JoinOrLeave)), reqBody);
 
     }
 
@@ -266,15 +242,7 @@ public class Functions {
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(this.formatSocketUrl("api/post/log/player_death")))
-            .setHeader("Content-Type", "application/json")
-            .version(HttpClient.Version.HTTP_1_1)
-            .POST(HttpRequest.BodyPublishers.ofString(reqBody))
-            .build();
-
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        this.sendPostRequest(URI.create(this.formatSocketUrl("api/post/log/player_death")), reqBody);
 
     }
 
@@ -287,16 +255,8 @@ public class Functions {
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(this.formatSocketUrl("api/post/log/server_start")))
-            .setHeader("Content-Type", "application/json")
-            .version(HttpClient.Version.HTTP_1_1)
-            .POST(HttpRequest.BodyPublishers.ofString(reqBody))
-            .build();
-
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        
+        this.sendPostRequest(URI.create(this.formatSocketUrl("api/post/log/server_start")), reqBody);
     }
 
     public void sendAdvancementLog(String playerName, int playerPing, InetSocketAddress playerIp, Boolean playerIsOperator, URI playerSkinUrl, String AdvancementName, String AdvancementDesc, String AdvancementIconItem) throws IOException, InterruptedException {
@@ -317,16 +277,8 @@ public class Functions {
 
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(this.formatSocketUrl("api/post/log/player_advancement")))
-            .setHeader("Content-Type", "application/json")
-            .version(HttpClient.Version.HTTP_1_1)
-            .POST(HttpRequest.BodyPublishers.ofString(reqBody))
-            .build();
-
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        
+        this.sendPostRequest(URI.create(this.formatSocketUrl("api/post/log/player_advancement")), reqBody);
 
     }
 
@@ -343,15 +295,7 @@ public class Functions {
         ObjectMapper objectmapper = new ObjectMapper();
         String reqBody = objectmapper.writeValueAsString(values);
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(this.formatSocketUrl("api/post/action")))
-            .setHeader("Content-type", "application/json")
-            .version(HttpClient.Version.HTTP_1_1)
-            .POST(HttpRequest.BodyPublishers.ofString(reqBody))
-            .build();
-        
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        this.sendPostRequest(URI.create(this.formatSocketUrl("api/post/action")), reqBody);
 
     }
 
@@ -480,6 +424,18 @@ public class Functions {
     private String formatSocketUrl(String path) {
     	String port = this.plugin.getConfig().getString("socketPort");
     	return String.format("http://127.0.0.1:%s/%s", port, path);
+    }
+    
+    private void sendPostRequest(URI url, String body) {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(url)
+            .setHeader("Content-Type", "application/json")
+            .version(HttpClient.Version.HTTP_1_1)
+            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .build();
+
+        client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
     }
 
     // ideas for more stuff:
