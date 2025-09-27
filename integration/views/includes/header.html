@@ -7,6 +7,10 @@
     <div class="navButtons">
         <a class="btn inline" href="/">Home</a>
         <a class="btn inline" href="/logs">Logs</a>
+        <% if (isAdmin) { %>
+            <a class="btn inline" href="/manage">Manage Server</a>
+            <a class="btn inline" href="/configure">Configure</a>
+        <% } %>
 
         <div class="account">
             <% if (session.isLoggedIn) { %>

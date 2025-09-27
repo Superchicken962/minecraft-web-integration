@@ -2,3 +2,4 @@ node_modules/
 secret.json
 *.bat
 plugin/target
+plugin/bin

@@ -52,13 +52,13 @@ socket.on("log:playerjoinorleave", (socket) => {
 });
 
 
-adminSocket.on("log:console", (socket) => {
-    log(socket.event.time, `
-        <div class="consoleLog">
-            <p>${socket.content}</p>
-        </div>
-    `);
-});
+// adminSocket.on("log:console", (socket) => {
+//     log(socket.event.time, `
+//         <div class="consoleLog">
+//             <p>${socket.content}</p>
+//         </div>
+//     `);
+// });
 
 
 socket.on("log:playerdeath", (socket) => {
@@ -96,12 +96,16 @@ socket.on("log:playeradvancement", (socket) => {
 });
 
 socket.on("action:*", (socket) => {
-    console.log(socket.eventTime);
-    var datesent = new Date(parseInt(socket.eventTime));
-    var p = document.createElement("p");
-    p.innerHTML = `<span style="color:grey;">${datesent.toLocaleString()} </span><span style="color:red;">[Server Log]</span> ${socket.player.username} has crafted ${socket.action.itemCrafted} (x${socket.action.amountCrafted})`;
-    p.style.color = "white";
-    document.body.appendChild(p);
+    const eventTime = new Date();
+    if (type !== "craftItem") return;
+
+    log(eventTime, `
+        <div class="advancement">
+            <img class="avatar" src="https://minotar.net/helm/${socket.player.username}"/>
+            <span class="message" style="color:#FFFF55">${socket.player.username} has crafted ${socket.action.itemCrafted} (x${socket.action.amountCrafted})</span></span>
+            <span class="time"></span>
+        </div>
+    `);
 });
 
 adminSocket.on("disconnect", (msg) => {
