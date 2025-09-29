@@ -346,7 +346,7 @@ p.label.valid {
 }
 .logsContainer .input input[type=text] {
     display: inline-block;
-    width: 80%;
+    width: 70%;
     height: 30px;
     outline: none;
     border: none;
@@ -370,6 +370,21 @@ p.label.valid {
 .logsContainer .input input[type=submit]:hover {
     background-color: rgba(230,230,230);
     cursor: pointer;
+}
+.logsContainer select {
+    display: inline-block;
+    height: 32px;
+    width: 10%;
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: rgba(190,190,190);
+    transition: 0.2s ease-in-out background-color;
+    vertical-align: top;
+}
+.logsContainer select:focus, .logsContainer select:hover {
+    background-color: rgba(230,230,230);
 }
 
 @media screen and (max-width: 500px) {

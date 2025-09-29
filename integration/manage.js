@@ -54,9 +54,13 @@ app.get("/api/logs/clear", (req, res) => {
 // Handle submission from form - it will redirect instead of returning status code.
 app.get("/api/logs/submit", async(req, res) => {
     const command = req.query.command;
+    const commandName = req.query.commandName;
 
-    if (command) {
-        await minecraftServer.enterCommand(command);
+    if (command || commandName) {
+        const commandText = (!!commandName) ? `${commandName} ${command}` : command;
+
+        // TODO: Perhaps handle if it was "not a success."
+        await minecraftServer.enterCommand(commandText);
 
         // Add an artificial delay so that the log from the result of the command is shown after redirect.
         await new Promise(resolve => setTimeout(resolve, 50));

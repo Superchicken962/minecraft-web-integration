@@ -29,12 +29,18 @@
                 <% for (const log of server.getLogs()) { %>
                     <p class="log">
                         <%= log.message %>
-                    </p>    
+                    </p>
                 <% } %>
             </div>
             
             <form class="input" action="/manage/api/logs/submit" method="GET">
-                <input class="chatInput" type="text" name="command" autofocus/>
+                <select class="chatSelect" name="commandName">
+                    <!-- Options are added with JavaScript. -->
+                </select>
+
+                <input class="chatInput" type="text" name="command" list="commandSuggestion" autocomplete="off" autofocus/>
+                <datalist id="commandSuggestion"></datalist>
+
                 <input class="chatSend" type="submit" value="Send"/>
             </form>
         </div>
