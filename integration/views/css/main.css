@@ -179,6 +179,11 @@ a {
     --colour: var(--discord_blurple_2);
 }
 
+.btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
 .header {
     display: block;
     margin: auto;
@@ -455,4 +460,53 @@ a.link:hover {
 
 .advancementName {
     color: rgb(84, 252, 84);
+}
+
+.updateNotice {
+    display: block;
+    margin: auto;
+    position: absolute;
+    height: fit-content;
+    top:0;
+    left:0;right:0;
+    background-color: var(--discord_yellow);
+    color: black;
+    text-align: center;
+    font-size: 24px;
+    padding: 8px 0;
+    font-family: monospace;
+}
+/* Shift content down a bit if the notice is shown. */
+body:has(.updateNotice) {
+    padding-top: 50px;
+}
+
+.updateInstructions {
+    display: block;
+    margin: auto;
+    width: fit-content;
+    padding: 4px 16px;
+}
+.updateInstructions.uptodate {
+    background-color: rgba(0, 200, 0, 0.2);
+    border-left: 4px solid rgb(0, 200, 0);
+}
+.updateInstructions.available {
+    background-color: rgba(180, 200, 0, 0.2);
+    border-left: 4px solid rgb(180, 200, 0);
+}
+
+textarea.textLog {
+    display: block;
+    margin: auto;
+    resize: none;
+    width: fit-content;
+    height: fit-content;
+    min-width: 500px;
+    min-height: 180px;
+    border: none;
+    outline: none;
+    background-color: rgb(18,18,18);
+    color: white;
+    margin-bottom: 5px;
 }

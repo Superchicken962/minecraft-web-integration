@@ -1,7 +1,7 @@
 const express = require("express");
-const { getBaseUrl, discordAuth } = require("./functions");
+const { getBaseUrl, discordAuth } = require("../functions");
 const app = express.Router();
-const secret = require("./secret.json");
+const secret = require("../secret.json");
 
 app.get("/", (req, res) => {
     if (req.session.isLoggedIn) {

@@ -7,14 +7,17 @@ const config = require("./config.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket } = require("./functions");
 const { requireAdmin } = require("./middleware");
+let upToDate = true;
 
 /** @type { Server } */
 let io;
 
 exports.register = function(socketIo) {
     io = socketIo;
+    
+    app.use("/installation", require("./routes/manageWebsite").register(io));
 
     // Handle connection for server namespace.
     io.of("/server").on("connection", (socket) => {
@@ -49,6 +52,10 @@ exports.register = function(socketIo) {
             socket.disconnect(true);
             return;
         }
+
+        socket.onAny((event, ...args) => {
+            adminSocket.handler(event, socket, ...args);
+        });
     });
 
     initSocketListeners(io);
@@ -92,6 +99,8 @@ app.use("*", (req, res, next) => {
     res.locals.isAdmin = isAdmin(req.session?.discord?.id);
 
     res.locals.calculateMemory = calculateMemory;
+
+    res.locals.upToDate = upToDate;
 
     next();
 });
@@ -151,7 +160,7 @@ app.post("/configure", requireAdmin, async(req, res) => {
     res.sendStatus(200);
 });
 
-app.use("/login", require("./auth"));
+app.use("/login", require("./routes/auth"));
 app.get(["/logout", "/signout"], (req, res) => {
     req.session.destroy(() => {
         res.redirect("/");
@@ -169,7 +178,7 @@ app.use("*", async(req, res, next) => {
     next();
 });
 
-app.use("/manage", require("./manage"));
+app.use("/manage", require("./routes/manage"));
 
 app.get("/setup", async(req, res) => {
     const configurations = await validateConfigurations();
@@ -479,5 +488,17 @@ function initSocketListeners(socketInstance) {
     //     });
     // }, 5000);
 }
+
+setTimeout(async() => {
+    const check = await checkProjectUpToDate();
+
+    if (!check.upToDate) {
+        console.warn("\n=========================================");
+        console.warn("An update for the website is available!");
+        console.warn("=========================================\n");
+
+        upToDate = false;
+    } 
+}, 2500);
 
 exports.router = app;

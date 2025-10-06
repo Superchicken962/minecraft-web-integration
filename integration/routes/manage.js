@@ -1,8 +1,8 @@
 const express = require("express");
 const app = express.Router();
-const config = require("./config.json");
-const secret = require("./secret.json");
-const { minecraftServer } = require("./DataStorage");
+const config = require("../config.json");
+const secret = require("../secret.json");
+const { minecraftServer } = require("../DataStorage");
 
 app.use("*", (req, res, next) => {
     // Continue if the user is an admin.

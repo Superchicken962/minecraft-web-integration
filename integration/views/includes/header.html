@@ -10,6 +10,7 @@
         <% if (isAdmin) { %>
             <a class="btn inline" href="/manage">Manage Server</a>
             <a class="btn inline" href="/configure">Configure</a>
+            <a class="btn inline" href="/installation">Installation</a>
         <% } %>
 
         <div class="account">
@@ -29,3 +30,9 @@
         </div>
     </div>
 </div>
+
+<% if (isAdmin && !upToDate) { %>
+    <div class="updateNotice">
+        <b>Project Update Available!</b> See more details <a class="link" href="/installation">here</a> on updating!
+    </div>
+<% } %>

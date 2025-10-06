@@ -7,6 +7,8 @@ const config = require("./config.json");
 const { default: axios } = require("axios");
 const dotNotes = require("dot-notes");
 const secret = require("./secret.json");
+const fetch = require("node-fetch");
+const package = require("./package.json");
 
 const serverInfo = {
     readConfig: async function() {
@@ -592,6 +594,147 @@ function combineObjects(local, foreign) {
     }
 }
 
+/**
+ * Reads directory down each folder path.
+ * 
+ * @param { String } path - Root path. 
+ * @param { String[] } ignore - Array of directories to ignore.
+ * @param { Boolean } useFullPath - Return the full path to each file in the directory?
+ */
+async function deepReadDirectory(rootPath, ignore = [], useFullPath = true) {
+    let fileList = [];
+    const dir = await fs.promises.readdir(rootPath, { withFileTypes: true });
+
+    for (const file of dir) {
+        const pth = (useFullPath) ? path.join(rootPath, file.name) : file.name;
+
+        // If "file" is a directory, then recursively search into it.
+        if (file.isDirectory() && !ignore?.includes(file.name)) {
+            fileList = fileList.concat(await deepReadDirectory(pth));
+            continue;
+        }
+
+        fileList.push(pth);
+    }
+
+    return fileList;
+}
+
+/**
+ * Get the latest available version from github.
+ * 
+ * @returns { Promise<Object> } Package.json contents.
+ */
+async function getLatestProjectVersion() {
+    const RAW_FILE_URL = "https://raw.githubusercontent.com/Superchicken962/minecraft-web-integration/refs/heads/main/integration/package.json";
+
+    const req = await fetch(RAW_FILE_URL);
+    if (!req.ok) {
+        console.warn("Error getting latest project from github!");
+        return {};
+    }
+
+    return req.json();
+}
+
+/**
+ * Check if the project is up to date.
+ * 
+ * @returns { Promise<{ upToDate: Boolean, latestVersion: Object }> } Results
+ */
+async function checkProjectUpToDate() {
+    const latestVersion = await getLatestProjectVersion();
+    const obj = {
+        upToDate: true,
+        latestVersion
+    };
+
+    if (package.version !== latestVersion?.version) {
+        obj.upToDate = false;
+    }
+
+    return obj;
+}
+
+const adminSocket = {
+    listeners: {},
+
+    /**
+     * Add a listener for an event from the admin socket.
+     */
+    listenFor: function(event, callback) {
+        this.listeners[event] = callback;
+    },
+
+    /**
+     * Gets listener with event.
+     * 
+     * @param { String } event
+     * @returns { Function | null } 
+     */
+    getListener: function(event) {
+        if (!(event in listeners)) return null;
+
+        return this.listeners[event];
+    },
+
+    /**
+     * Checks given event and if it matches a listener, calls it. 
+     * 
+     * @param { String } event 
+     * @param  { ...any } args 
+     */
+    handler: function(event, ...args) {
+        if (!(event in this.listeners) || typeof this.listeners[event] !== "function") return null;
+
+        return this.listeners[event](...args);
+    }
+};
+
+const projectUpdateStatus = {
+    updating: false,
+    logs: []
+};
+
+/**
+ * Update project.
+ * 
+ * @param { (msg: String, data: Object) => {} } onprogress - On progress event. 
+ */
+async function updateProject(onprogress) {
+    if (projectUpdateStatus.updating) {
+        console.warn("Project already updating!");
+        return;
+    }
+
+    projectUpdateStatus.updating = true;
+    projectUpdateStatus.logs = [];
+
+    const progress = (message, data) => {
+        projectUpdateStatus.logs.push({ ...data, message});
+        onprogress?.(message, data);
+    }
+
+    progress("Starting update...", {});
+    
+    setTimeout(() => {
+        progress("Second update", {});
+    }, 2000);
+
+    setTimeout(() => {
+        progress("Third update", {});
+    }, 3000);
+
+    setTimeout(() => {
+        progress("Fourth update", {});
+    }, 5000);
+
+    setTimeout(() => {
+        progress("Done!", {});
+        projectUpdateStatus.updating = false;
+    }, 8000);
+}
+
 module.exports = {
     serverInfo,
     askSocket,
@@ -606,5 +749,11 @@ module.exports = {
     readJsonFile,
     getDeepObjectKeys,
     parseConfigFormSaveData,
-    combineObjects
+    combineObjects,
+    deepReadDirectory,
+    getLatestProjectVersion,
+    checkProjectUpToDate,
+    adminSocket,
+    updateProject,
+    projectUpdateStatus
 };
