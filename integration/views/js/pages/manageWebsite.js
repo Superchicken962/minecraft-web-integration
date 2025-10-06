@@ -18,6 +18,5 @@ updateBtn.addEventListener("click", async() => {
 });
 
 adminSocket.on("updateProject:progress", (data) => {
-    console.log(progressBox.value);
     progressBox.value += `${data.message}\n`;
 });

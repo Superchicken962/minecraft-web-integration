@@ -1,6 +1,15 @@
 const { spawn } = require("child_process");
 const { Server } = require("socket.io");
-const { calculateMemory } = require("../functions");
+
+/**
+ * Converts gigabytes into megabyte memory format for minecraft server.
+ * 
+ * @param { Number } gb - Gigabytes to convert.
+ * @returns { Number } Memory to allocate server in megabytes.
+*/
+function calculateMemory(gb) {
+    return gb*1024;
+}
 
 const MAX_STORED_LOGS = 6;
 
@@ -70,21 +79,48 @@ class ServerManager {
 
     /**
      * Stop the server.
+     * 
+     * @returns { Promise }
      */
-    stop() {
-        if (!this.#process) {
-            throw new Error("Server is not running!");
-        }
-
-        // Write "stop" to the process to stop the mincraft server safely - then kill process and set var to null.
-        this.#process.stdin.write("stop\n", (success, err) => {
-            if (err) {
-                throw new Error("Error stopping server: ", err);
+    stop() {        
+        return new Promise((resolve, reject) => {
+            if (!this.#process) {
+                reject("Server is not running!");
+                return;
             }
 
-            this.#process.kill(0);
-            this.#process = null;
-            this.running = false;
+            // Write "stop" to the process to stop the mincraft server safely - then kill process and set var to null.
+            this.#process.stdin.write("stop\n", (success, err) => {
+                if (err) {
+                    reject(`Error stopping server: ${err}`);
+                    return;
+                }
+
+                let cancelTimeout;
+
+                // Wait until mc server fully stops before killing process and etc
+                this.#process.stdout.on("data", (data) => {
+                    // TODO: just check if this message consistently means the server has shutdown.
+                    // Until then, assume after 3s of no ouput then its done.
+                    const done = data.toString().includes("All dimensions are saved");
+
+                    // Essentially wait until there are 3s of no output, then assume it's stopped.
+                    clearTimeout(cancelTimeout);
+                    cancelTimeout = setTimeout(() => {
+
+                        this.#process?.stdin?.end();
+                        this.#process?.kill();
+                        this.running = false;
+
+                        resolve();
+
+                    }, 3000);
+                });
+
+                this.#process.on("exit", () => {
+                    this.#process = null;
+                });
+            });
         });
     }
 

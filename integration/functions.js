@@ -9,6 +9,7 @@ const dotNotes = require("dot-notes");
 const secret = require("./secret.json");
 const fetch = require("node-fetch");
 const package = require("./package.json");
+const { minecraftServer } = require("./DataStorage");
 
 const serverInfo = {
     readConfig: async function() {
@@ -715,24 +716,16 @@ async function updateProject(onprogress) {
         onprogress?.(message, data);
     }
 
+    if (minecraftServer.running) {
+        progress("Stopping minecraft server...", {});
+        await minecraftServer.stop();
+        progress("Minecraft server stopped", {});
+    }
+
     progress("Starting update...", {});
-    
-    setTimeout(() => {
-        progress("Second update", {});
-    }, 2000);
 
-    setTimeout(() => {
-        progress("Third update", {});
-    }, 3000);
-
-    setTimeout(() => {
-        progress("Fourth update", {});
-    }, 5000);
-
-    setTimeout(() => {
-        progress("Done!", {});
-        projectUpdateStatus.updating = false;
-    }, 8000);
+    progress("Done!", {});
+    projectUpdateStatus.updating = false;
 }
 
 module.exports = {
