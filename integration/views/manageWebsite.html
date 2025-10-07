@@ -14,10 +14,10 @@
         <h2>Installation</h2>
 
         <div class="updateInstructions <%= (upToDate) ? "uptodate" : "available" %>">
-            <% if (upToDate) { %>
-                <h3>Update Available!</h3>
+            <% if (!upToDate) { %>
+                <h3>Update Available for WebPanel!</h3>
 
-                <p>Please note, the server will have to be stopped in order to update!</p>
+                <p>Please note, the minecraft server will have to be stopped in order to update!</p>
                 <p>
                     <%= package.version %> => <%= latestPackage?.version %>
                 </p>

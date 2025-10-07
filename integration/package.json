@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@discordjs/rest": "^1.7.0",
+    "auto-git-update": "^2.1.2",
     "axios": "^1.7.9",
     "body-parser": "^1.20.2",
     "child_process": "^1.0.2",
