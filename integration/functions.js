@@ -10,7 +10,7 @@ const secret = require("./secret.json");
 const fetch = require("node-fetch");
 const package = require("./package.json");
 const { minecraftServer } = require("./DataStorage");
-const AutoGitUpdate = require("auto-git-update");
+const { ProjectFileUpdater } = require("./classes/ProjectUpdater");
 
 const serverInfo = {
     readConfig: async function() {
@@ -724,15 +724,10 @@ async function updateProject(onprogress) {
 
     progress("Starting update...", {});
 
-    const updater = new AutoGitUpdate({
-        repository: package.repository,
-        fromReleases: false,
-        branch: "develop",
-        tempLocation: path.join(__dirname, "tmp"),
-        ignoreFiles: ["config.json", "secret.json"]
+    const updater = new ProjectFileUpdater(["config.json", "secret.json"]);
+    await updater.update((msg) => {
+        progress(msg, {});
     });
-
-    await updater.forceUpdate();
 
     progress("Update complete!", {});
     projectUpdateStatus.updating = false;
