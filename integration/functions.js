@@ -724,7 +724,9 @@ async function updateProject(onprogress) {
 
     progress("Starting update...", {});
 
-    const updater = new ProjectFileUpdater(["config.json", "secret.json"]);
+    const newVersion = (await getLatestProjectVersion()).version;
+
+    const updater = new ProjectFileUpdater(["config.json", "secret.json"], newVersion, true);
     await updater.update((msg) => {
         progress(msg, {});
     });

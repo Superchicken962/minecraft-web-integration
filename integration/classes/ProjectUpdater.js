@@ -1,16 +1,24 @@
 const { gitP } = require("simple-git");
 const fs = require("fs-extra");
 const path = require("node:path");
+const config = require("../config.json");
+const { Readable } = require("node:stream");
 
 class ProjectFileUpdater {
     #rootDir = path.join(__dirname, "../");
+    #devMode;
+    #latestVersion;
 
     /**
      * @param { String[] } ignoreFiles - Files to ignore. 
+     * @param { String } latestVersion - The tag of the latest version to be downloaded from github.
+     * @param { Boolean? } testing - Testing mode, if set to true, files in project directory will not be overwritten.
      */
-    constructor(ignoreFiles) {
+    constructor(ignoreFiles, latestVersion, testing = false) {
         this.repo = "https://github.com/Superchicken962/minecraft-web-integration";
         this.ignoreFiles = ignoreFiles || [];
+        this.#devMode = testing;
+        this.#latestVersion = latestVersion;
     }
 
     async #clone() {
@@ -26,11 +34,11 @@ class ProjectFileUpdater {
     }
 
     async #formatFiles() {
-        const basePath = path.join(this.#rootDir, "clone/integration");
+        const webPath = path.join(this.#rootDir, "clone/integration");
 
         // Delete files specified in "ignore files".
         for (const fileName of this.ignoreFiles) {
-            const pth = path.join(basePath, fileName);
+            const pth = path.join(webPath, fileName);
     
             if (fs.existsSync(pth)) {
                 await fs.promises.unlink(pth);
@@ -42,9 +50,45 @@ class ProjectFileUpdater {
         const clonePath = path.join(this.#rootDir, "clone");
 
         // Copy the current directory as a backup - ensure we do not copy node_modules.
-        await fs.promises.cp(this.#rootDir, path.join(this.#rootDir, "../integration_backup"), { recursive: true, filter: (f => !f.includes("node_modules")) });
+        await fs.promises.cp(this.#rootDir, path.join(this.#rootDir, "../integration_backup"), { recursive: true, filter: (f => !f.includes("node_modules") && !f.includes("clone")) });
+
+        // If dev mode is not enabled, replace files in project directory.
+        if (!this.#devMode) {
+
+        }
 
         console.log(clonePath);
+    }
+
+    #updatePlugin() {
+        return new Promise(async(resolve) => {
+            if (!this.#latestVersion) return "Plugin already up to date";
+
+            const fileName = "minecraft-web-integration";
+            const downloadUrl = `https://github.com/Superchicken962/minecraft-web-integration/releases/download/v${this.#latestVersion}/${fileName}.jar`;
+
+            console.log(downloadUrl);
+            // pathTo should be the path to the server.jar, so go back one and enter plugins folder.
+            const serverPluginPath = path.join(config.server.pathTo, "../plugins");
+            if (!serverPluginPath) {
+                resolve("Plugin failed to update: No valid server path provided in config!");
+            }
+
+            const filePath = path.join(serverPluginPath, `${fileName}.jar`);
+            const writeStream = fs.createWriteStream(filePath);
+            const req = await fetch(downloadUrl);
+            Readable.fromWeb(req.body).pipe(writeStream);
+
+            writeStream.on("finish", () => {
+                resolve("Plugin has been updated");
+            });
+
+            writeStream.on("error", (e) => {
+                fs.unlink(filePath);
+                console.error("Failed to download plugin", e);
+                resolve("Failed downloading plugin! Check console for more details");
+            });
+        });
     }
 
     /**
@@ -62,6 +106,10 @@ class ProjectFileUpdater {
 
         onprogress?.("Replacing files...");
         await this.#replaceFiles();
+
+        onprogress?.("Updating plugin...");
+        const pluginStatus = await this.#updatePlugin();
+        onprogress?.(pluginStatus);
     }
 }
 
