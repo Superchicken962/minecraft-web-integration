@@ -1,5 +1,5 @@
 const { gitP } = require("simple-git");
-const fs = require("node:fs");
+const fs = require("fs-extra");
 const path = require("node:path");
 
 class ProjectFileUpdater {
@@ -18,7 +18,7 @@ class ProjectFileUpdater {
 
         // If clone files are still there, clear it.
         if (fs.existsSync(clonePath)) {
-            await fs.promises.rm(clonePath);
+            await fs.emptyDir(clonePath);
         }
 
         const git = gitP();
@@ -26,7 +26,7 @@ class ProjectFileUpdater {
     }
 
     async #formatFiles() {
-        const basePath = path.join(this.#rootDir, "clone/integration")
+        const basePath = path.join(this.#rootDir, "clone/integration");
 
         // Delete files specified in "ignore files".
         for (const fileName of this.ignoreFiles) {
@@ -41,8 +41,8 @@ class ProjectFileUpdater {
     async #replaceFiles() {
         const clonePath = path.join(this.#rootDir, "clone");
 
-        // Copy the current directory as a backup.
-        await fs.promises.cp(this.#rootDir, path.join(this.#rootDir, "backup"), { recursive: true });
+        // Copy the current directory as a backup - ensure we do not copy node_modules.
+        await fs.promises.cp(this.#rootDir, path.join(this.#rootDir, "../integration_backup"), { recursive: true, filter: (f => !f.includes("node_modules")) });
 
         console.log(clonePath);
     }

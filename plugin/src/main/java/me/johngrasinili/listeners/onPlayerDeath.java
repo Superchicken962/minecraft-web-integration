@@ -11,6 +11,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
+import me.johngrasinili.Utility;
 
 public class onPlayerDeath implements Listener {
 	private Functions Function = null;
@@ -26,7 +27,7 @@ public class onPlayerDeath implements Listener {
 
         String deathMsg = event.getDeathMessage();
         String editedDeathMsg = deathMsg.replaceAll(player.getName(), "%p");
-        URI senderSkinUrl = player.getPlayerProfile().getTextures().getSkin().toURI();
+        URI senderSkinUrl = Utility.getPlayerSkinUri(player);
         
         if (killer != null) {
             editedDeathMsg = deathMsg.replaceAll(killer.getName(), "%k");

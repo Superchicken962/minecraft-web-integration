@@ -8,7 +8,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 
 public class onEntityDamagedByEntity implements Listener {
 	private Functions Function = null;

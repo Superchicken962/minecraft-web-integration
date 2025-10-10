@@ -74,6 +74,11 @@ class ServerManager {
         }
 
         this.#process = this.#newServerProcess(this.#serverPath, this.memory);
+        this.#process.on("exit", () => {
+            // Set running to false, and delete process whenever it exits, as to do it for server crashes too.
+            this.#process = null;
+            this.running = false;
+        });
         this.running = true;
     }
 
@@ -110,15 +115,10 @@ class ServerManager {
 
                         this.#process?.stdin?.end();
                         this.#process?.kill();
-                        this.running = false;
 
                         resolve();
 
                     }, 3000);
-                });
-
-                this.#process.on("exit", () => {
-                    this.#process = null;
                 });
             });
         });

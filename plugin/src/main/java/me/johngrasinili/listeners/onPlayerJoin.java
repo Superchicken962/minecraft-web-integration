@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import me.johngrasinili.Functions;
-import net.md_5.bungee.api.ChatColor;
+import me.johngrasinili.Utility;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.ChatColor;
 
 public class onPlayerJoin implements Listener {
 	private Plugin plugin = null;
@@ -30,7 +32,7 @@ public class onPlayerJoin implements Listener {
         Function.addPlayerToScoreboard(event.getPlayer());
 
         Player player = event.getPlayer();
-        URI senderSkinUrl = player.getPlayerProfile().getTextures().getSkin().toURI();
+        URI senderSkinUrl = Utility.getPlayerSkinUri(player);
 
         Function.sendLogsToServer(player.getName(), player.getPing(), player.getAddress(), player.isOp(), senderSkinUrl, "join", "%p joined the game");
 
