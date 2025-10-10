@@ -187,7 +187,7 @@ public class Functions {
         values.put("message.sender.ip", senderIp.toString());
         values.put("message.sender.ping", Integer.toString(senderPing));
         values.put("message.sender.isOp", senderIsOperator.toString());
-        values.put("message.sender.skinUrl", senderSkinUrl.toString());
+        values.put("message.sender.skinUrl", Utility.toStringOrNull(senderSkinUrl));
         values.put("message.content", chatMessage); 
         Date date = new Date();
         values.put("eventTime", Long.toString(date.getTime()));
@@ -208,7 +208,7 @@ public class Functions {
         values.put("player.ip", playerIp.toString());
         values.put("player.ping", Integer.toString(playerPing));
         values.put("player.isOp", playerIsOperator.toString());
-        values.put("player.skinUrl", senderSkinUrl.toString());
+        values.put("player.skinUrl", Utility.toStringOrNull(senderSkinUrl));
         values.put("eventMessage", JoinOrLeaveMessage);
         Date date = new Date();
         values.put("eventTime", Long.toString(date.getTime()));
@@ -228,7 +228,7 @@ public class Functions {
         values.put("player.username", playerName);
         values.put("player.ping", Integer.toString(playerPing));
         values.put("player.isOp", playerIsOperator.toString());
-        values.put("player.skinUrl", senderSkinUrl.toString());
+        values.put("player.skinUrl", Utility.toStringOrNull(senderSkinUrl));
         values.put("deathMessage", deathMessage);
         if (playerKiller != null) {
             values.put("killer.username", playerKiller.getName());
@@ -267,7 +267,7 @@ public class Functions {
         values.put("player.ip", playerIp.toString());
         values.put("player.ping", Integer.toString(playerPing));
         values.put("player.isOp", playerIsOperator.toString());
-        values.put("player.skinUrl", playerSkinUrl.toString());
+        values.put("player.skinUrl", Utility.toStringOrNull(playerSkinUrl));
         values.put("event.advancementName", AdvancementName);
         values.put("event.advancementDesc", AdvancementDesc);
         values.put("event.advancementIcon", AdvancementIconItem);

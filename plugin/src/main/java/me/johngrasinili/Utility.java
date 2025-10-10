@@ -29,4 +29,14 @@ public class Utility {
 		return uri;
 	}
 
+	/**
+	 * Convert object to string, or returns null if object is null.
+	 * 
+	 * @return String or null
+	 */
+	public static String toStringOrNull(Object obj) {
+		if (obj == null) return null;
+		
+		return obj.toString();
+	}
 }
