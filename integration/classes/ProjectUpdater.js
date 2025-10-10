@@ -3,10 +3,10 @@ const fs = require("fs-extra");
 const path = require("node:path");
 const config = require("../config.json");
 const { Readable } = require("node:stream");
+require("dotenv").config();
 
 class ProjectFileUpdater {
     #rootDir = path.join(__dirname, "../");
-    #devMode;
     #latestVersion;
 
     /**
@@ -14,10 +14,9 @@ class ProjectFileUpdater {
      * @param { String } latestVersion - The tag of the latest version to be downloaded from github.
      * @param { Boolean? } testing - Testing mode, if set to true, files in project directory will not be overwritten.
      */
-    constructor(ignoreFiles, latestVersion, testing = false) {
+    constructor(ignoreFiles, latestVersion) {
         this.repo = "https://github.com/Superchicken962/minecraft-web-integration";
         this.ignoreFiles = ignoreFiles || [];
-        this.#devMode = testing;
         this.#latestVersion = latestVersion;
     }
 
@@ -53,8 +52,8 @@ class ProjectFileUpdater {
         await fs.promises.cp(this.#rootDir, path.join(this.#rootDir, "../integration_backup"), { recursive: true, filter: (f => !f.includes("node_modules") && !f.includes("clone")) });
 
         // If dev mode is not enabled, replace files in project directory.
-        if (!this.#devMode) {
-
+        if (process.env.dev != "true") {
+            
         }
 
         console.log(clonePath);
