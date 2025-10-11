@@ -53,9 +53,10 @@ class ProjectFileUpdater {
 
         // If dev mode is not enabled, replace files in project directory.
         if (process.env.dev != "true") {
-            // Copy from clone to main directory, then delete clone.
-            await fs.promises.cp(path.join(this.#rootDir, "clone"), this.#rootDir);
-            await fs.promises.rmdir(path.join(this.#rootDir, "clone"));
+            // Copy from clone to main directory, then empty & delete clone folder.
+            await fs.promises.cp(clonePath, this.#rootDir, { recursive: true });
+            await fs.emptyDir(clonePath)
+            await fs.promises.rmdir(clonePath);
         }
 
         console.log(clonePath);
