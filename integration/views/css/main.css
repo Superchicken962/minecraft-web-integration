@@ -4,6 +4,8 @@
     --discord_red: #ed4245;
     --discord_green: #57F287;
     --discord_yellow: #FEE75C;
+    --btn_main: rgb(33, 134, 230);
+    --btn_secondary: rgb(10, 90, 165);
 }
 
 body {
@@ -509,4 +511,31 @@ textarea.textLog {
     background-color: rgb(18,18,18);
     color: white;
     margin-bottom: 5px;
+}
+
+.dropdown {
+    display: inline-block;
+    position: relative;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: var(--btn_main);
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.dropdown-content a {
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    color: white;
+}
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+.dropdown-content a:hover {
+    background-color: var(--btn_secondary);
 }

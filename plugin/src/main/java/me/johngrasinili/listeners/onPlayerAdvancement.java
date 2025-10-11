@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
+import me.johngrasinili.Utility;
 
 public class onPlayerAdvancement implements Listener {
 	private Functions Function = null;
@@ -23,7 +24,7 @@ public class onPlayerAdvancement implements Listener {
     public void onAdvancementUnlock(PlayerAdvancementDoneEvent event) throws IOException, InterruptedException, URISyntaxException {
         Player player = event.getPlayer();
 
-        URI playerskinurl = event.getPlayer().getPlayerProfile().getTextures().getSkin().toURI();
+        URI playerSkinUrl = Utility.getPlayerSkinUri(player);
 
         if (event.getAdvancement().getDisplay() == null) return;
 
@@ -31,6 +32,6 @@ public class onPlayerAdvancement implements Listener {
         String advancementDesc = event.getAdvancement().getDisplay().getDescription();
         String advancementIcon = event.getAdvancement().getDisplay().getIcon().getType().name();
         
-        Function.sendAdvancementLog(player.getName(), player.getPing(), player.getAddress(), player.isOp(), playerskinurl, advancementName, advancementDesc, advancementIcon);
+        Function.sendAdvancementLog(player.getName(), player.getPing(), player.getAddress(), player.isOp(), playerSkinUrl, advancementName, advancementDesc, advancementIcon);
     }
 }

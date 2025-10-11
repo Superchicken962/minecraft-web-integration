@@ -357,7 +357,8 @@ function getRequiredSecretConfigFields() {
         "guildId": {desc: "Id of Discord server to use"},
         "token": {desc: "Discord bot token"},
         "webhookURL": {desc: "Discord webhook to send logs to"},
-        "socketAuthToken": {desc: "Authentication token for socket - must match token given in plugin (config.yml)"}
+        "socketAuthToken": {desc: "Authentication token for socket - must match token given in plugin (config.yml)"},
+        "redirectUrl": {desc: "Essentially the website url in config.json - used to redirect after logging in through Discord."}
     };
 }
 
@@ -468,7 +469,10 @@ async function validateConfigurations() {
  * Gets the url from config.json - additional
  */
 function getBaseUrl() {
-    return config.settings?.url?.endsWith("/") ? config.settings.url.slice(0, -1) : config.settings?.url;
+    // If url is not on config, fallback to secret.
+    const url = config.settings?.url ?? secret.redirectUrl;
+
+    return url?.endsWith("/") ? url.slice(0, -1) : url;
 }
 
 const discordAuth = {
@@ -532,6 +536,15 @@ function calculateMemory(gb) {
  */
 function isAdmin(id) {
     return config?.settings?.admins?.includes(id);
+}
+
+/**
+ * Get admin count.
+ * 
+ * @returns { Number }
+ */
+function getAdminCount() {
+    return Array.isArray(config?.settings?.admins) ? config.settings.admins.length : 0;
 }
 
 /**
@@ -759,5 +772,6 @@ module.exports = {
     checkProjectUpToDate,
     adminSocket,
     updateProject,
-    projectUpdateStatus
+    projectUpdateStatus,
+    getAdminCount
 };

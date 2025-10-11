@@ -7,7 +7,7 @@ const config = require("./config.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket, getAdminCount } = require("./functions");
 const { requireAdmin } = require("./middleware");
 let upToDate = true;
 
@@ -97,6 +97,7 @@ app.use("*", (req, res, next) => {
         return isAdmin(id || req.session?.discord?.id);
     };
     res.locals.isAdmin = isAdmin(req.session?.discord?.id);
+    res.locals.adminCount = getAdminCount();
 
     res.locals.calculateMemory = calculateMemory;
 
@@ -186,12 +187,17 @@ app.get("/setup", async(req, res) => {
 });
 
 function renderSetupPage(req, res, configurations) {
+    // If one or more fields in the secretFile are invalid, then essentially this will allow all users to see the setup page.
+    // Since logging in will not properly work without the secret file.
+    const invalidSecret = Object.values(configurations.configurations?.secretFile?.fields ?? {}).some(e => !e);
+
     res.render("setupProject.html", {
         configurations: configurations.configurations,
         fieldDescriptions: {
             secret: getRequiredSecretConfigFields(),
             config: getRequiredConfigFields()
-        }
+        },
+        invalidSecret
     });
 }
 

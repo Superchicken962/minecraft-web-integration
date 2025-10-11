@@ -1,9 +1,16 @@
 const { Client, IntentsBitField, Collection, Colors, MessageManager, MessageFlags } = require("discord.js");
 
 const client = new Client({ intents: [IntentsBitField.Flags.Guilds, IntentsBitField.Flags.DirectMessages, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.GuildWebhooks, IntentsBitField.Flags.DirectMessageReactions, IntentsBitField.Flags.GuildMessageReactions, IntentsBitField.Flags.MessageContent] });
-const secret = require("./secret.json");
 const path = require("path");
 const fs = require("fs");
+
+// If config and/or secret files do not exist, just create them with no data - use sync here as it is done once at app startup and we want it done asap.
+if (!fs.existsSync("./config.json")) {
+    fs.writeFileSync("./config.json", JSON.stringify({}), "utf-8");
+}
+if (!fs.existsSync("./secret.json")) {
+    fs.writeFileSync("./secret.json", JSON.stringify({}), "utf-8");
+}
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -11,7 +18,6 @@ const app = express();
 const session = require("express-session");
 
 const http = require("http");
-
 const httpServer = http.createServer(app);
 
 const { Server } = require("socket.io");
@@ -19,6 +25,7 @@ const { serverInfo, askSocket } = require("./functions");
 const io = new Server(httpServer);
 const PORT = 3003;
 const config = require("./config.json");
+const secret = require("./secret.json");
 
 process.env.TZ = "Australia/Adelaide";
 process.title = "Minecraft Web Integration";
@@ -97,4 +104,4 @@ client.on("ready", () => {
     serverInfo.update(client, io);
 });
 
-client.login(secret.token);
+if (secret.token) client.login(secret.token);
