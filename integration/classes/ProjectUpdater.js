@@ -54,7 +54,7 @@ class ProjectFileUpdater {
         // If dev mode is not enabled, replace files in project directory.
         if (process.env.dev != "true") {
             // Copy from clone to main directory, then empty & delete clone folder.
-            await fs.promises.cp(clonePath, this.#rootDir, { recursive: true });
+            await fs.promises.cp(path.join(clonePath, "integration"), this.#rootDir, { recursive: true });
             await fs.emptyDir(clonePath)
             await fs.promises.rmdir(clonePath);
         }
