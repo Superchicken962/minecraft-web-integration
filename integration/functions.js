@@ -732,7 +732,11 @@ async function updateProject(onprogress) {
     });
 
     progress("Update complete!", {});
+    progress("Restarting website...", {});
+
     projectUpdateStatus.updating = false;
+
+    process.exit(0);
 }
 
 module.exports = {

@@ -59,8 +59,6 @@ class ProjectFileUpdater {
             await fs.emptyDir(clonePath)
             await fs.promises.rmdir(clonePath);
         }
-
-        console.log(clonePath);
     }
 
     #updateModules() {
@@ -84,7 +82,6 @@ class ProjectFileUpdater {
             const fileName = "minecraft-web-integration";
             const downloadUrl = `https://github.com/Superchicken962/minecraft-web-integration/releases/download/v${this.#latestVersion}/${fileName}.jar`;
 
-            console.log(downloadUrl);
             // pathTo should be the path to the server.jar, so go back one and enter plugins folder.
             const serverPluginPath = path.join(config.server.pathTo, "../plugins");
             if (!serverPluginPath) {
@@ -94,10 +91,18 @@ class ProjectFileUpdater {
             const filePath = path.join(serverPluginPath, `${fileName}.jar`);
             const writeStream = fs.createWriteStream(filePath);
             const req = await fetch(downloadUrl);
+
+            if (!req.ok) {
+                resolve("Plugin already up to date");
+                writeStream.close();
+                return;
+            }
+
             Readable.fromWeb(req.body).pipe(writeStream);
 
             writeStream.on("finish", () => {
                 resolve("Plugin has been updated");
+                writeStream.close();
             });
 
             writeStream.on("error", (e) => {
