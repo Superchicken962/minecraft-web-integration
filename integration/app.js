@@ -21,6 +21,7 @@ const PORT = 3003;
 const config = require("./config.json");
 
 process.env.TZ = "Australia/Adelaide";
+process.title = "Minecraft Web Integration";
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());

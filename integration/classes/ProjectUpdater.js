@@ -3,7 +3,8 @@ const fs = require("fs-extra");
 const path = require("node:path");
 const config = require("../config.json");
 const { Readable } = require("node:stream");
-require("dotenv").config();
+const { exec } = require("node:child_process");
+require("dotenv").config({ quiet: true });
 
 class ProjectFileUpdater {
     #rootDir = path.join(__dirname, "../");
@@ -62,6 +63,20 @@ class ProjectFileUpdater {
         console.log(clonePath);
     }
 
+    #updateModules() {
+        return new Promise(resolve => {
+            exec("npm i", (error, stdout, stderr) => {
+                if (error) {
+                    console.log("Failed to update libraries", error);
+                    return resolve("Failed to update libraries");
+                }
+
+                process.title = "Minecraft Web Integration";
+                resolve("Updated libraries");
+            });
+        });
+    }
+
     #updatePlugin() {
         return new Promise(async(resolve) => {
             if (!this.#latestVersion) return "Plugin already up to date";
@@ -108,6 +123,10 @@ class ProjectFileUpdater {
 
         onprogress?.("Replacing files...");
         await this.#replaceFiles();
+
+        onprogress?.("Installing & updating libraries...");
+        const libraryMsg = await this.#updateModules();
+        onprogress?.(libraryMsg);
 
         onprogress?.("Updating plugin...");
         const pluginStatus = await this.#updatePlugin();
