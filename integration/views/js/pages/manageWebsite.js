@@ -9,7 +9,7 @@ const progressBox = document.querySelector("textarea.textLog") || document.creat
 progressBox.className = "textLog";
 progressBox.disabled = true;
 
-updateBtn.addEventListener("click", async() => {
+updateBtn?.addEventListener("click", async() => {
     updateBtn.classList.add("disabled");
     updateBtn.before(progressBox);
     progressBox.value = "";
@@ -19,4 +19,19 @@ updateBtn.addEventListener("click", async() => {
 
 adminSocket.on("updateProject:progress", (data) => {
     progressBox.value += `${data.message}\n`;
+});
+
+
+const checkUpdateBtn = document.querySelector(".checkUpdateBtn");
+checkUpdateBtn?.addEventListener("click", () => {
+    checkUpdateBtn.classList.add("disabled");
+    
+    fetch("/api/check-update", { method: "PATCH" }).then((res) => {
+        checkUpdateBtn.innerHTML = `<i class="fa fa-check"></i>`;
+
+        // Reload if an update is available now.
+        if (res.status === 205) {
+            window.location.reload();
+        }
+    });
 });

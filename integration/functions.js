@@ -751,7 +751,7 @@ async function updateProject(onprogress) {
 
     setTimeout(() => {
         process.exit(0);
-    }, 1000);
+    }, 2500);
 }
 
 module.exports = {

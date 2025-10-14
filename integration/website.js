@@ -233,6 +233,7 @@ app.get("/logs", (req, res) => {
     res.render("logs.html", {recentLogs: pastLogs, viewmode: viewmode, auth: auth});
 });
 
+// TODO: Remove this two routes - no longer needed but ensure it doesn't break anything by removing.
 app.get("/mode/:mode", (req, res) => {
     var valid_modes = ["null", "normal", "admin"];
     var mode = req.params.mode;
@@ -252,7 +253,6 @@ app.get("/mode/:mode", (req, res) => {
 });
 
 app.post("/admin/auth", (req, res) => {
-    console.log(req.body);
     const adminpwd = "2801";
     var givenpwd = req.body.pwd;
 
@@ -495,7 +495,24 @@ function initSocketListeners(socketInstance) {
     // }, 5000);
 }
 
-setTimeout(async() => {
+app.patch("/api/check-update", async(req, res, next) => {
+    if (!isAdmin(req.session?.discord?.id)) return next();
+
+    await checkUpToDate();
+
+    if (upToDate) {
+        res.sendStatus(200);
+        return;
+    }
+
+    // If not up to date, send "reset content" status - prompting page to reload and show update available.
+    res.sendStatus(205);
+});
+
+async function checkUpToDate() {
+    // Do not check again if we already know it's outdated.
+    if (!upToDate) return;
+
     const check = await checkProjectUpToDate();
 
     if (!check.upToDate) {
@@ -505,6 +522,9 @@ setTimeout(async() => {
 
         upToDate = false;
     } 
-}, 2500);
+}
+setTimeout(checkUpToDate, 2500);
+// Re-check for updates every 1 hour.
+setInterval(checkUpToDate, (1000 * 60 * 60));
 
 exports.router = app;
