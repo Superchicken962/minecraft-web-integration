@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import me.johngrasinili.Functions;
+import me.johngrasinili.Utility;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,7 +22,7 @@ public class onPlayerLeave implements Listener {
     @EventHandler
     public void onLeave(PlayerQuitEvent event) throws IOException, InterruptedException, URISyntaxException {
         Player player = event.getPlayer();
-        URI senderSkinUrl = player.getPlayerProfile().getTextures().getSkin().toURI();
+        URI senderSkinUrl = Utility.getPlayerSkinUri(player);
 
         Function.sendLogsToServer(player.getName(), player.getPing(), player.getAddress(), player.isOp(), senderSkinUrl, "leave", "%p left the game");
 

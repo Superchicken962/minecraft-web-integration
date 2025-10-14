@@ -7,6 +7,10 @@ const config = require("./config.json");
 const { default: axios } = require("axios");
 const dotNotes = require("dot-notes");
 const secret = require("./secret.json");
+const fetch = require("node-fetch");
+const package = require("./package.json");
+const { minecraftServer } = require("./DataStorage");
+const { ProjectFileUpdater } = require("./classes/ProjectUpdater");
 
 const serverInfo = {
     readConfig: async function() {
@@ -353,7 +357,8 @@ function getRequiredSecretConfigFields() {
         "guildId": {desc: "Id of Discord server to use"},
         "token": {desc: "Discord bot token"},
         "webhookURL": {desc: "Discord webhook to send logs to"},
-        "socketAuthToken": {desc: "Authentication token for socket - must match token given in plugin (config.yml)"}
+        "socketAuthToken": {desc: "Authentication token for socket - must match token given in plugin (config.yml)"},
+        "redirectUrl": {desc: "Essentially the website url in config.json - used to redirect after logging in through Discord."}
     };
 }
 
@@ -464,7 +469,10 @@ async function validateConfigurations() {
  * Gets the url from config.json - additional
  */
 function getBaseUrl() {
-    return config.settings?.url?.endsWith("/") ? config.settings.url.slice(0, -1) : config.settings?.url;
+    // If url is not on config, fallback to secret.
+    const url = config.settings?.url ?? secret.redirectUrl;
+
+    return url?.endsWith("/") ? url.slice(0, -1) : url;
 }
 
 const discordAuth = {
@@ -531,6 +539,15 @@ function isAdmin(id) {
 }
 
 /**
+ * Get admin count.
+ * 
+ * @returns { Number }
+ */
+function getAdminCount() {
+    return Array.isArray(config?.settings?.admins) ? config.settings.admins.length : 0;
+}
+
+/**
  * Reads and parses a json file at a given path.
  * 
  * @param { String } path - Path to file.
@@ -592,6 +609,149 @@ function combineObjects(local, foreign) {
     }
 }
 
+/**
+ * Reads directory down each folder path.
+ * 
+ * @param { String } path - Root path. 
+ * @param { String[] } ignore - Array of directories to ignore.
+ * @param { Boolean } useFullPath - Return the full path to each file in the directory?
+ */
+async function deepReadDirectory(rootPath, ignore = [], useFullPath = true) {
+    let fileList = [];
+    const dir = await fs.promises.readdir(rootPath, { withFileTypes: true });
+
+    for (const file of dir) {
+        const pth = (useFullPath) ? path.join(rootPath, file.name) : file.name;
+
+        // If "file" is a directory, then recursively search into it.
+        if (file.isDirectory() && !ignore?.includes(file.name)) {
+            fileList = fileList.concat(await deepReadDirectory(pth));
+            continue;
+        }
+
+        fileList.push(pth);
+    }
+
+    return fileList;
+}
+
+/**
+ * Get the latest available version from github.
+ * 
+ * @returns { Promise<Object> } Package.json contents.
+ */
+async function getLatestProjectVersion() {
+    const RAW_FILE_URL = "https://raw.githubusercontent.com/Superchicken962/minecraft-web-integration/refs/heads/main/integration/package.json";
+
+    const req = await fetch(RAW_FILE_URL);
+    if (!req.ok) {
+        console.warn("Error getting latest project from github!");
+        return {};
+    }
+
+    return req.json();
+}
+
+/**
+ * Check if the project is up to date.
+ * 
+ * @returns { Promise<{ upToDate: Boolean, latestVersion: Object }> } Results
+ */
+async function checkProjectUpToDate() {
+    const latestVersion = await getLatestProjectVersion();
+    const obj = {
+        upToDate: true,
+        latestVersion
+    };
+
+    if (package.version !== latestVersion?.version) {
+        obj.upToDate = false;
+    }
+
+    return obj;
+}
+
+const adminSocket = {
+    listeners: {},
+
+    /**
+     * Add a listener for an event from the admin socket.
+     */
+    listenFor: function(event, callback) {
+        this.listeners[event] = callback;
+    },
+
+    /**
+     * Gets listener with event.
+     * 
+     * @param { String } event
+     * @returns { Function | null } 
+     */
+    getListener: function(event) {
+        if (!(event in listeners)) return null;
+
+        return this.listeners[event];
+    },
+
+    /**
+     * Checks given event and if it matches a listener, calls it. 
+     * 
+     * @param { String } event 
+     * @param  { ...any } args 
+     */
+    handler: function(event, ...args) {
+        if (!(event in this.listeners) || typeof this.listeners[event] !== "function") return null;
+
+        return this.listeners[event](...args);
+    }
+};
+
+const projectUpdateStatus = {
+    updating: false,
+    logs: []
+};
+
+/**
+ * Update project.
+ * 
+ * @param { (msg: String, data: Object) => {} } onprogress - On progress event. 
+ */
+async function updateProject(onprogress) {
+    if (projectUpdateStatus.updating) {
+        console.warn("Project already updating!");
+        return;
+    }
+
+    projectUpdateStatus.updating = true;
+    projectUpdateStatus.logs = [];
+
+    const progress = (message, data) => {
+        projectUpdateStatus.logs.push({ ...data, message});
+        onprogress?.(message, data);
+    }
+
+    if (minecraftServer.running) {
+        progress("Stopping minecraft server...", {});
+        await minecraftServer.stop();
+    }
+
+    progress("Starting update...", {});
+
+    const newVersion = (await getLatestProjectVersion()).version;
+
+    const updater = new ProjectFileUpdater(["config.json", "secret.json"], newVersion);
+    await updater.update((msg) => {
+        progress(msg, {});
+    });
+
+    progress("Update complete!", {});
+    progress("Restarting website...", {});
+
+    projectUpdateStatus.updating = false;
+
+    process.exit(0);
+}
+
 module.exports = {
     serverInfo,
     askSocket,
@@ -606,5 +766,12 @@ module.exports = {
     readJsonFile,
     getDeepObjectKeys,
     parseConfigFormSaveData,
-    combineObjects
+    combineObjects,
+    deepReadDirectory,
+    getLatestProjectVersion,
+    checkProjectUpToDate,
+    adminSocket,
+    updateProject,
+    projectUpdateStatus,
+    getAdminCount
 };

@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 
 public class test implements CommandExecutor {
 	private Functions Function = null;

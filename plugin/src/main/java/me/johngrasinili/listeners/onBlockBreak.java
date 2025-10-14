@@ -10,7 +10,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.plugin.Plugin;
 
 import me.johngrasinili.Functions;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 
 public class onBlockBreak implements Listener {
 	private Plugin plugin = null;

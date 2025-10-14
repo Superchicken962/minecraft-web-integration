@@ -8,7 +8,9 @@ const config = require("./config.json");
  * @param { Function } next 
  */
 function requireAdmin(req, res, next) {
-    if (config?.settings?.admins?.length > 0 && config?.settings?.admins?.includes(req.session?.discord?.id)) {
+    const noAdmins = Array.isArray(config?.settings?.admins) ? config?.settings?.admins.length === 0 : true;
+
+    if ((req.session.isLoggedIn && noAdmins) || config?.settings?.admins?.includes(req.session?.discord?.id)) {
         next();
         return;
     }

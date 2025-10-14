@@ -3,3 +3,6 @@ secret.json
 *.bat
 plugin/target
 plugin/bin
+integration/clone
+integration_backup/
+.env

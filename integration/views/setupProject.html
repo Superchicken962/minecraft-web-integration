@@ -10,7 +10,7 @@
 <body>
     <div class="misconfigurationMenu">
         <h1>Project Setup</h1>
-        <% if (isAdmin) { %>          
+        <% if ((isAdmin || (session.isLoggedIn && adminCount === 0)) || invalidSecret) { %>          
             <p>
                 Check the summary below to see any missing or invalid options to make according changes for the website to work!
                 <br>Sections marked with an 'x' indicate that an entry is missing or invalid, while a tick indicates it is fine.
