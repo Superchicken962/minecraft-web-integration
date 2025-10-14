@@ -745,11 +745,13 @@ async function updateProject(onprogress) {
     });
 
     progress("Update complete!", {});
-    progress("Restarting website...", {});
+    progress("Please restart website if it does not do it automatically!", {});
 
     projectUpdateStatus.updating = false;
 
-    process.exit(0);
+    setTimeout(() => {
+        process.exit(0);
+    }, 1000);
 }
 
 module.exports = {
