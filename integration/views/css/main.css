@@ -288,6 +288,10 @@ p.label.valid {
 .mainMenu .button:hover {
     background-color: rgb(46,46,46);
 }
+/* Add a space between element if there is another. */
+.mainMenu ~ .mainMenu {
+    margin-top: 15px;
+}
 
 .logsContainer {
     display: block;
