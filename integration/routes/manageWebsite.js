@@ -13,15 +13,15 @@ const { Server } = require("socket.io");
  * @param { Server } io 
  */
 exports.register = (io) => {
-    // app.use("*", (req, res, next) => {
-    //     // Continue if the user is an admin.
-    //     if (config.settings?.admins?.includes(req.session?.discord?.id)) {
-    //         next();
-    //         return;
-    //     }
+    app.use("*", (req, res, next) => {
+        // Continue if the user is an admin.
+        if (config.settings?.admins?.includes(req.session?.discord?.id)) {
+            next();
+            return;
+        }
 
-    //     res.sendStatus(404);
-    // });
+        res.sendStatus(404);
+    });
 
     adminSocket.listenFor("updateProject:start", (socket) => {
         updateProject((msg, data) => {
