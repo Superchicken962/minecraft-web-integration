@@ -214,6 +214,45 @@ const serverInfo = {
         // Send just a fullstop for the message will be edited shortly after.
         const msg = await channel.send(".");
         return msg;
+    },
+
+    /**
+     * Get key/values from the config.yml file.
+     * 
+     * @param { Server } io - Socket.
+     * @returns { Promise<Object> }
+     */
+    getPluginConfig: (io) => {
+        return new Promise((resolve, reject) => {
+            askSocket.askServer(io.of("/server"), "getConfig", (data) => {
+                const config = data;
+                
+                console.log(config);
+
+                resolve(config);
+            }, () => {
+                reject("Timed out!");
+            }, 3);
+        });
+    },
+
+    /**
+     * Set value(s) of config.yml file.
+     * 
+     * @param { Server } io - Socket.
+     * @param { Object[] } data - Array of key/value pairs.
+     * @param { String } data.key - Config key name.
+     * @param { String } data.value - Config value name.
+     * @returns { Promise<Boolean> } - Success?
+     */
+    setPluginConfigValues: (io, data) => {
+        return new Promise((resolve, reject) => {
+            askSocket.askServer(io.of("/server"), { event: "updateConfig", values: data }, (data) => {
+                resolve(data.success);
+            }, () => {
+                reject("Timed out!");
+            }, 3);
+        });
     }
 }
 

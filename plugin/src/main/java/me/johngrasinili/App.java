@@ -38,6 +38,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.sun.tools.javac.launcher.Main;
+
 public class App extends JavaPlugin implements Listener {
 
     public static Plugin instance = null;
@@ -150,7 +152,35 @@ public class App extends JavaPlugin implements Listener {
                     	break;
                     	
                     case "getconfig":
-                    	this.getConfig();
+                    	dataToRespond.put("config", this.getConfig().saveToString());
+                    	dataToRespond.put("success", true);
+                    	break;
+                    	
+                    case "updateconfig":
+                    	JSONArray cfg = response.getJSONArray("values");
+                    	int changesMade = 0;
+                    	
+                    	for (int i = 0; i < cfg.length(); i++) {                    		
+                    		try {
+                    			JSONObject obj = cfg.getJSONObject(i);
+                    			
+                    			String key = obj.getString("key");
+                    			Object value = obj.get("value");
+
+                    			this.getConfig().set(key, value);
+                    			changesMade++;
+                    		} catch (Exception e) {}
+                    	}
+                    	
+                    	// If changes were made, this was successful so save config to file.
+                    	if (changesMade > 0) {
+                    	
+                    		this.saveConfig();
+                    		dataToRespond.put("success", true);
+                    	
+                    	} else {                    		
+                    		dataToRespond.put("success", false);
+                    	}
                     	
                     	break;
                 }

@@ -7,7 +7,7 @@ const config = require("./config.json");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket, getAdminCount } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket, getAdminCount, serverInfo } = require("./functions");
 const { requireAdmin } = require("./middleware");
 let upToDate = true;
 
@@ -507,6 +507,33 @@ app.patch("/api/check-update", async(req, res, next) => {
 
     // If not up to date, send "reset content" status - prompting page to reload and show update available.
     res.sendStatus(205);
+});
+
+app.get("/api/config.yml", async(req, res, next) => {
+    if (!isAdmin(req.session?.discord?.id)) return next();
+    if (!io) return res.sendStatus(503);
+
+    try {
+        const cfg = await serverInfo.getPluginConfig(io);
+        res.json(cfg);
+    } catch {
+        res.sendStatus(504);
+    }
+});
+
+app.get("/api/config.yml/set", async(req, res, next) => {
+    if (!isAdmin(req.session?.discord?.id)) return next();
+    if (!io) return res.sendStatus(503);
+    if (!req.query.name || !req.query.value) return res.sendStatus(400);
+
+    try {
+        const success = await serverInfo.setPluginConfigValues(io, [{ key: req.query.name, value: req.query.value}]);
+        res.json({ success });
+    } catch (e) {
+        if (e === "Timed out!") return res.sendStatus(504);
+        res.sendStatus(500);
+        console.log("Error updating config:", e);
+    }
 });
 
 async function checkUpToDate() {
