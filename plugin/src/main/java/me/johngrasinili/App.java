@@ -160,10 +160,13 @@ public class App extends JavaPlugin implements Listener {
                     	JSONArray cfg = response.getJSONArray("values");
                     	int changesMade = 0;
                     	
-                    	for (int i = 0; i < cfg.length(); i++) {                    		
+                    	// Loop through the given key/value pairs.
+                    	for (int i = 0; i < cfg.length(); i++) {     
+                    		// Catch any errors in getting data and ignore it - move onto next.
                     		try {
                     			JSONObject obj = cfg.getJSONObject(i);
                     			
+                    			// Data should be in format { key: "", value: "" }
                     			String key = obj.getString("key");
                     			Object value = obj.get("value");
 

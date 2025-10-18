@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const path = require("path");
 const secret = require("./secret.json");
 const config = require("./config.json");
+const yaml = require("yaml");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
@@ -515,9 +516,16 @@ app.get("/api/config.yml", async(req, res, next) => {
 
     try {
         const cfg = await serverInfo.getPluginConfig(io);
-        res.json(cfg);
+
+        if (!cfg.success) return res.sendStatus(500);
+
+        // Convert yml to json.
+        const config = yaml.parse(cfg.config);
+        res.json(config);
     } catch {
-        res.sendStatus(504);
+        if (e === "Timed out!") return res.sendStatus(504);
+        res.sendStatus(500);
+        console.log("Error updating config:", e);
     }
 });
 
