@@ -373,6 +373,7 @@ function BooleanConvert(value) {
  */
 function getRequiredConfigFields() {
     return {
+        "web.port": { desc: "The port for the webserver to run on (default = 80)", requiresRestart: true, default: 80, type: Number },
         "settings.serverUpdateInterval": {desc: "The interval (in seconds) for the server info to be updated on Discord", requiresRestart: false, default: 90, type: Number},
         "settings.url": {desc: "The website url", requiresRestart: true},
         "settings.requireLoginForAccess": {desc: "Should users have to login with Discord to use the site?", requiresRestart: true, default: false, type: BooleanConvert},
@@ -466,13 +467,21 @@ async function validateConfigurations() {
 }
 
 /**
- * Gets the url from config.json - additional
+ * Gets the url from config.json
  */
 function getBaseUrl() {
     // If url is not on config, fallback to secret.
-    const url = config.settings?.url ?? secret.redirectUrl;
+    try {
+        const url = new URL(config.settings?.url ?? secret.redirectUrl);
 
-    return url?.endsWith("/") ? url.slice(0, -1) : url;
+        // If port is given in config, set/replace the one in the url.
+        if (config.web?.port) url.port = config.web?.port;
+
+        return url.href.endsWith("/") ? url.href.slice(0, -1) : url.href;
+    } catch {
+        console.warn("Invalid URL provided in config/secret!");
+        return "";
+    }
 }
 
 const discordAuth = {

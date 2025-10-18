@@ -46,7 +46,7 @@ public class App extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
 
-        getLogger().info("Baby-gamers plugin enabled!");
+        getLogger().info("Minecraft web integration plugin enabled!");
         getServer().getPluginManager().registerEvents(new onPlayerJoin(instance), this);
         getServer().getPluginManager().registerEvents(new onBlockBreak(instance), this);
         getServer().getPluginManager().registerEvents(new onBlockExplode(instance), this);
@@ -148,6 +148,11 @@ public class App extends JavaPlugin implements Listener {
                         Function.sendFakeChatMessage(username, message);
                         dataToRespond.put("success", true);
                     	break;
+                    	
+                    case "getconfig":
+                    	this.getConfig();
+                    	
+                    	break;
                 }
 
                 Function.socket.emit("askServer:response", dataToRespond);
@@ -192,7 +197,7 @@ public class App extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         instance = null;
-        getLogger().info("Baby-Gamers plugin disabled");
+        getLogger().info("Minecraft web integration plugin disabled");
     }
 
     public static Plugin getPluginInstance(){
