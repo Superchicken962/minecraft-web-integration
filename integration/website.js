@@ -522,21 +522,32 @@ app.get("/api/config.yml", async(req, res, next) => {
         // Convert yml to json.
         const config = yaml.parse(cfg.config);
         res.json(config);
-    } catch {
+    } catch (e) {
         if (e === "Timed out!") return res.sendStatus(504);
         res.sendStatus(500);
         console.log("Error updating config:", e);
     }
 });
 
-app.get("/api/config.yml/set", async(req, res, next) => {
+app.post("/api/config.yml", async(req, res, next) => {
     if (!isAdmin(req.session?.discord?.id)) return next();
     if (!io) return res.sendStatus(503);
-    if (!req.query.name || !req.query.value) return res.sendStatus(400);
+
+    const { entries } = req.body;
+    if (!entries) return res.sendStatus(400);
+    const data = [];
+
+    // Reformat data into objects of specified key and value.
+    for (const [key, val] of Object.entries(entries)) {
+        data.push({
+            key: key,
+            value: val
+        });
+    }
 
     try {
-        const success = await serverInfo.setPluginConfigValues(io, [{ key: req.query.name, value: req.query.value}]);
-        res.json({ success });
+        const success = await serverInfo.setPluginConfigValues(io, data);
+        res.sendStatus(success ? 200 : 500);
     } catch (e) {
         if (e === "Timed out!") return res.sendStatus(504);
         res.sendStatus(500);

@@ -543,3 +543,42 @@ textarea.textLog {
 .dropdown-content a:hover {
     background-color: var(--btn_secondary);
 }
+
+.alert {
+    display: inline-block;
+    margin: auto;
+    width: fit-content;
+    height: fit-content;
+    padding: 4px 16px;
+    border-left: 4px solid blueviolet;
+    background-color: rgba(138, 43, 226, 0.2);
+}
+.alert.success {
+    border-left: 4px solid rgb(0, 200, 0);
+    background-color: rgba(0, 200, 0, 0.2);
+}
+.alert.error {
+    border-left: 4px solid rgb(200, 0, 0);
+    background-color: rgba(200, 0, 0, 0.2);
+}
+.alert.warning {
+    background-color: rgba(180, 200, 0, 0.2);
+    border-left: 4px solid rgb(180, 200, 0);
+}
+.alert:empty {
+    display: none;
+}
+
+*.hidden {
+    display: none;
+}
+
+.pluginConfig {
+    display: block;
+    margin: auto;
+    width: fit-content;
+}
+.pluginConfig .inputs {
+    text-align: left;
+    margin-bottom: 20px;
+}

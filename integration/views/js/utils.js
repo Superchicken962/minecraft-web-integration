@@ -19,3 +19,20 @@ function showElements(...elements) {
         el.style.display = "block";
     });
 }
+
+/**
+ * Get all name/value data from elements matching selector.
+ * 
+ * @param { String } selector 
+ * @returns 
+ */
+function getKeys(selector) {
+    const elements = document.querySelectorAll(selector);
+    const keys = {};
+
+    for (const element of elements) {
+        keys[element.name] = element.value;
+    }
+
+    return keys;
+}
