@@ -24,7 +24,7 @@
     "yaml": "^2.8.1"
   },
   "name": "minecraft-plugin-integration",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Web integration with minecraft server",
   "main": "app.js",
   "scripts": {
