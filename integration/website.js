@@ -4,10 +4,11 @@ const fs = require("node:fs");
 const path = require("path");
 const secret = require("./secret.json");
 const config = require("./config.json");
+const yaml = require("yaml");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket, getAdminCount } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket, getAdminCount, serverInfo, getPluginConfig, updatePluginConfig } = require("./functions");
 const { requireAdmin } = require("./middleware");
 let upToDate = true;
 
@@ -507,6 +508,32 @@ app.patch("/api/check-update", async(req, res, next) => {
 
     // If not up to date, send "reset content" status - prompting page to reload and show update available.
     res.sendStatus(205);
+});
+
+app.get("/api/config.yml", async(req, res, next) => {
+    if (!isAdmin(req.session?.discord?.id)) return next();
+
+    const cfg = await getPluginConfig();
+    res.json(cfg);
+});
+
+app.post("/api/config.yml", async(req, res, next) => {
+    if (!isAdmin(req.session?.discord?.id)) return next();
+    if (!io) return res.sendStatus(503);
+
+    const { entries } = req.body;
+    if (!entries) return res.sendStatus(400);
+
+    try {
+        // Update config file, then reload the config on the mc server to refresh the data.
+        await updatePluginConfig(entries);
+        await serverInfo.reloadConfig(io);
+    } catch (e) {
+        console.warn("Error updating plugin config:", e);
+        return res.sendStatus(500);
+    }
+
+    res.sendStatus(201);
 });
 
 async function checkUpToDate() {

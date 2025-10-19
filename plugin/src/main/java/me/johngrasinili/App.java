@@ -38,6 +38,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.sun.tools.javac.launcher.Main;
+
 public class App extends JavaPlugin implements Listener {
 
     public static Plugin instance = null;
@@ -46,7 +48,7 @@ public class App extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
 
-        getLogger().info("Baby-gamers plugin enabled!");
+        getLogger().info("Minecraft web integration plugin enabled!");
         getServer().getPluginManager().registerEvents(new onPlayerJoin(instance), this);
         getServer().getPluginManager().registerEvents(new onBlockBreak(instance), this);
         getServer().getPluginManager().registerEvents(new onBlockExplode(instance), this);
@@ -148,6 +150,53 @@ public class App extends JavaPlugin implements Listener {
                         Function.sendFakeChatMessage(username, message);
                         dataToRespond.put("success", true);
                     	break;
+                    	
+                    case "getconfig":
+                    	dataToRespond.put("config", this.getConfig().saveToString());
+                    	dataToRespond.put("success", true);
+                    	break;
+                    
+                    // Event for reloading the config from disk.
+                    case "reloadconfig":
+                    	this.reloadConfig();
+                    	dataToRespond.put("success", true);
+                    	
+                    	break;
+                    	
+                    case "updateconfig":
+                    	JSONArray cfg = response.getJSONArray("values");
+                    	int changesMade = 0;
+                    	
+                    	// Loop through the given key/value pairs.
+                    	for (int i = 0; i < cfg.length(); i++) {     
+                    		// Catch any errors in getting data and ignore it - move onto next.
+                    		try {
+                    			JSONObject obj = cfg.getJSONObject(i);
+                    			
+                    			// Data should be in format { key: "", value: "" }
+                    			String key = obj.getString("key");
+                    			obj.getInt(key);
+                    			Object value = obj.get("value");
+
+                    			this.getConfig().set(key, value);
+                    			changesMade++;
+                    		} catch (Exception e) {
+                    			System.out.println("Error updating config value!");
+                    			System.out.println(e);
+                    		}
+                    	}
+                    	
+                    	// If changes were made, this was successful so save config to file.
+                    	if (changesMade > 0) {
+                    	
+                    		this.saveConfig();
+                    		dataToRespond.put("success", true);
+                    	
+                    	} else {                    		
+                    		dataToRespond.put("success", false);
+                    	}
+                    	
+                    	break;
                 }
 
                 Function.socket.emit("askServer:response", dataToRespond);
@@ -192,7 +241,7 @@ public class App extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         instance = null;
-        getLogger().info("Baby-Gamers plugin disabled");
+        getLogger().info("Minecraft web integration plugin disabled");
     }
 
     public static Plugin getPluginInstance(){

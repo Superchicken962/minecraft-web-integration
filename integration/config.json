@@ -32,5 +32,8 @@
             "disconnect": true,
             "chat": true
         }
+    },
+    "web": {
+        "port": 3003
     }
 }

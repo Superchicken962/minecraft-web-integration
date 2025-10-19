@@ -1,14 +1,3 @@
-function getKeys(selector) {
-    const elements = document.querySelectorAll(selector);
-    const keys = {};
-
-    for (const element of elements) {
-        keys[element.name] = element.value;
-    }
-
-    return keys;
-}
-
 async function save() {
     const configKeys = getKeys(".configKey");
     const secretKeys = getKeys(".secretKey");

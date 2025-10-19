@@ -1,7 +1,7 @@
 main: me.johngrasinili.App
-name: baby-gamers-mc-plugin
-version: 0.1
-api-version: 1.19
+name: minecraft-web-integration
+version: 1.0.3
+api-version: 1.21
 commands:
   protectBlocks:
     description: Toggle protecting blocks on hit

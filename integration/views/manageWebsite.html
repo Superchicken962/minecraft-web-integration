@@ -38,13 +38,22 @@
         </div>
     </div>
 
-    <!-- <div class="mainMenu">
-        <h2>Plugin Settings</h2>
-    </div> -->
+    <div class="mainMenu">
+        <h2>Plugin Config.yml</h2>
+        <p class="hint">Ensure that the socketAuthToken matches the one in secret.json, and the socketPort is correct!</p>
+
+        <div class="pluginConfig">
+            <div class="inputs">...</div>
+        </div>
+
+        <a class="btn good saveBtn disabled">Save</a>
+        <p class="alert pluginConfigResponse"></p>
+    </div>
 </body>
 <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 <script>
     const MY_ID = "<%= session?.discord?.id %>";
 </script>
+<script src="/js/utils.js"></script>
 <script src="/js/pages/manageWebsite"></script>
 </html>

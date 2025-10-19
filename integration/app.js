@@ -23,9 +23,17 @@ const httpServer = http.createServer(app);
 const { Server } = require("socket.io");
 const { serverInfo, askSocket } = require("./functions");
 const io = new Server(httpServer);
-const PORT = 3003;
 const config = require("./config.json");
 const secret = require("./secret.json");
+const PORT = config?.web?.port ?? 80;
+(async() => {
+    // If config does not contain these values, then add them and save.
+    if (!config.web) config.web = {};
+    if (!config.web.port) {
+        config.web.port = PORT
+        fs.writeFileSync("./config.json", JSON.stringify(config, null, 4), "utf-8");
+    };
+})();
 
 process.env.TZ = "Australia/Adelaide";
 process.title = "Minecraft Web Integration";

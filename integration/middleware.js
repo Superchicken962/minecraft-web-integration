@@ -15,7 +15,7 @@ function requireAdmin(req, res, next) {
         return;
     }
 
-    res.sendStatus(403);
+    res.redirect("/");
 }
 
 module.exports = {
