@@ -592,3 +592,7 @@ textarea.textLog {
         max-width: 100%;
     }
 }
+
+.hint a {
+    color: grey;
+}
