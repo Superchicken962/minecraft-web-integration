@@ -36,3 +36,20 @@ function getKeys(selector) {
 
     return keys;
 }
+
+/**
+ * Resizes elements to use the same width - gets the width from the element with the max width.
+ */
+function setElementsToMaxWidth(selector) {
+    const els = document.querySelectorAll(selector);
+
+    // Find max width of all elements.
+    let maxWidth = 0;
+    [...els].map(e => {
+        maxWidth = Math.max(maxWidth, e.clientWidth);
+    });
+
+    for (const el of els) {
+        el.style.width = maxWidth + "px";
+    }
+}

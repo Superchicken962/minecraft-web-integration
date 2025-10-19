@@ -582,3 +582,13 @@ textarea.textLog {
     text-align: left;
     margin-bottom: 20px;
 }
+.pluginConfig input {
+    field-sizing: content;
+    max-width: 60%;
+}
+
+@media screen and (min-width: 1250px) {
+    .pluginConfig input {
+        max-width: 100%;
+    }
+}

@@ -77,6 +77,7 @@ async function loadPluginConfig() {
         configContainer.appendChild(inpDiv);
     }
 
+    setElementsToMaxWidth("input");
     saveBtn.classList.remove("disabled");
     configContainer.classList.remove("hidden");
 }

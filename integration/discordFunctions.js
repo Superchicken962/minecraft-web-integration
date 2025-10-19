@@ -109,11 +109,15 @@ function sendToLogsChannel(type, log) {
  * @returns { Promise<Boolean> } Was a valid command found and run?
  */
 async function runCommand(message) {
+    const cfg = await serverInfo.readConfig();
+
     // This command will create a new message for updating and store it in config.
     if (message.content.startsWith("mc!here")) {
-        message.delete();
+        try {
+            await message.delete();
+        } catch {};
 
-        const sentMsg = await serverInfo.sendMessage(message.channel);
+        const sentMsg = await serverInfo.sendMessage(message.channel, "Server updates will be shown here...");
 
         // Store current channel id in config.
         cfg.message = {
@@ -137,7 +141,9 @@ async function runCommand(message) {
         });
 
         setTimeout(() => {
-            message.delete();
+            try {
+                message.delete();
+            } catch {}
             reply.delete();
         }, 3000);
 

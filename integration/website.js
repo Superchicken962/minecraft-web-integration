@@ -8,7 +8,7 @@ const yaml = require("yaml");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
-const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket, getAdminCount, serverInfo } = require("./functions");
+const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket, getAdminCount, serverInfo, getPluginConfig, updatePluginConfig } = require("./functions");
 const { requireAdmin } = require("./middleware");
 let upToDate = true;
 
@@ -512,21 +512,9 @@ app.patch("/api/check-update", async(req, res, next) => {
 
 app.get("/api/config.yml", async(req, res, next) => {
     if (!isAdmin(req.session?.discord?.id)) return next();
-    if (!io) return res.sendStatus(503);
 
-    try {
-        const cfg = await serverInfo.getPluginConfig(io);
-
-        if (!cfg.success) return res.sendStatus(500);
-
-        // Convert yml to json.
-        const config = yaml.parse(cfg.config);
-        res.json(config);
-    } catch (e) {
-        if (e === "Timed out!") return res.sendStatus(504);
-        res.sendStatus(500);
-        console.log("Error updating config:", e);
-    }
+    const cfg = await getPluginConfig();
+    res.json(cfg);
 });
 
 app.post("/api/config.yml", async(req, res, next) => {
@@ -535,24 +523,17 @@ app.post("/api/config.yml", async(req, res, next) => {
 
     const { entries } = req.body;
     if (!entries) return res.sendStatus(400);
-    const data = [];
-
-    // Reformat data into objects of specified key and value.
-    for (const [key, val] of Object.entries(entries)) {
-        data.push({
-            key: key,
-            value: val
-        });
-    }
 
     try {
-        const success = await serverInfo.setPluginConfigValues(io, data);
-        res.sendStatus(success ? 200 : 500);
+        // Update config file, then reload the config on the mc server to refresh the data.
+        await updatePluginConfig(entries);
+        await serverInfo.reloadConfig(io);
     } catch (e) {
-        if (e === "Timed out!") return res.sendStatus(504);
-        res.sendStatus(500);
-        console.log("Error updating config:", e);
+        console.warn("Error updating plugin config:", e);
+        return res.sendStatus(500);
     }
+
+    res.sendStatus(201);
 });
 
 async function checkUpToDate() {

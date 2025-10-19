@@ -155,6 +155,13 @@ public class App extends JavaPlugin implements Listener {
                     	dataToRespond.put("config", this.getConfig().saveToString());
                     	dataToRespond.put("success", true);
                     	break;
+                    
+                    // Event for reloading the config from disk.
+                    case "reloadconfig":
+                    	this.reloadConfig();
+                    	dataToRespond.put("success", true);
+                    	
+                    	break;
                     	
                     case "updateconfig":
                     	JSONArray cfg = response.getJSONArray("values");
@@ -168,11 +175,15 @@ public class App extends JavaPlugin implements Listener {
                     			
                     			// Data should be in format { key: "", value: "" }
                     			String key = obj.getString("key");
+                    			obj.getInt(key);
                     			Object value = obj.get("value");
 
                     			this.getConfig().set(key, value);
                     			changesMade++;
-                    		} catch (Exception e) {}
+                    		} catch (Exception e) {
+                    			System.out.println("Error updating config value!");
+                    			System.out.println(e);
+                    		}
                     	}
                     	
                     	// If changes were made, this was successful so save config to file.

@@ -11,6 +11,7 @@ const fetch = require("node-fetch");
 const package = require("./package.json");
 const { minecraftServer } = require("./DataStorage");
 const { ProjectFileUpdater } = require("./classes/ProjectUpdater");
+const yaml = require("yaml");
 
 const serverInfo = {
     readConfig: async function() {
@@ -208,11 +209,12 @@ const serverInfo = {
      * Sends status message.
      * 
      * @param { import("discord.js").Channel } channel - Channel to send message to.
+     * @param { String? } message - Message to send - defaults to fullstop.
      * @returns { Promise<Message> } Newly sent message.
      */
-    sendMessage: async function(channel) {
+    sendMessage: async function(channel, message = ".") {
         // Send just a fullstop for the message will be edited shortly after.
-        const msg = await channel.send(".");
+        const msg = await channel.send(message);
         return msg;
     },
 
@@ -248,6 +250,21 @@ const serverInfo = {
     setPluginConfigValues: (io, data) => {
         return new Promise((resolve, reject) => {
             askSocket.askServer(io.of("/server"), { event: "updateConfig", values: data }, (data) => {
+                resolve(data.success);
+            }, () => {
+                reject("Timed out!");
+            }, 3);
+        });
+    },
+
+    /**
+     * Reload the server's in-memory config by re-reading the file from disk.
+     * 
+     * @param { Server } io - Socket.
+     */
+    reloadConfig: (io) => {
+        return new Promise((resolve, reject) => {
+            askSocket.askServer(io.of("/server"), "reloadConfig", (data) => {
                 resolve(data.success);
             }, () => {
                 reject("Timed out!");
@@ -802,6 +819,67 @@ async function updateProject(onprogress) {
     }, 2500);
 }
 
+/**
+ * Reads a yaml file and parses content to JSON.
+ * 
+ * @param { String } pth - Path of yaml file.
+ * @param { any } def - Default value to return if file not found or an error occured.
+ * @returns { Promise<Object> } JSON
+ */
+async function readYamlToJson(pth, def = {}) {
+    if (!fs.existsSync(pth)) return def;
+
+    const content = await fs.promises.readFile(pth, "utf-8");
+    const json = yaml.parse(content);
+
+    return json;
+}
+
+/**
+ * Update values for a .yml file.
+ * 
+ * @param { String } pth - Path to yaml file.
+ * @param { Object } entries - Key/value pairs to update values of.
+ */
+async function updateYamlFileValues(pth, entries) {
+    const content = await fs.promises.readFile(pth, "utf-8");
+    const document = yaml.parseDocument(content);
+    
+    // Go through given entries, and set the values to the keys in the file.
+    for (const [key, val] of Object.entries(entries)) {
+        document.set(key, val);
+    }
+    
+    return fs.promises.writeFile(pth, document.toString(), "utf-8");
+}
+
+/**
+ * Get the config.yml for the plugin.
+ * 
+ * @returns { Promise<Object> }
+ */
+function getPluginConfig() {
+    const PLUGIN_NAME = "minecraft-web-integration";
+
+    return readYamlToJson(path.join(config.server?.pathTo, `../plugins/${PLUGIN_NAME}/config.yml`));
+}
+
+/**
+ * Update config.yml for plugin with given data.
+ * 
+ * @param { Object } data - Key/val pairs to set/update in the file.
+ */
+function updatePluginConfig(data) {
+    const PLUGIN_NAME = "minecraft-web-integration";
+
+    // Go through, and ensure all numbers are properly represented as such - and not as strings.
+    for (const [key, val] of Object.entries(data)) {
+        if (!isNaN(val)) data[key] = val*1;
+    }
+
+    return updateYamlFileValues(path.join(config.server?.pathTo, `../plugins/${PLUGIN_NAME}/config.yml`), data);
+}
+
 module.exports = {
     serverInfo,
     askSocket,
@@ -823,5 +901,7 @@ module.exports = {
     adminSocket,
     updateProject,
     projectUpdateStatus,
-    getAdminCount
+    getAdminCount,
+    getPluginConfig,
+    updatePluginConfig
 };
