@@ -32,7 +32,20 @@ checkUpdateBtn?.addEventListener("click", () => {
         // Reload if an update is available now.
         if (res.status === 205) {
             window.location.reload();
+            return;
         }
+
+        const forceHint = document.createElement("p");
+        forceHint.className = "hint";
+        forceHint.innerHTML = `Or, <a class="forceUpdateBtn">force update</a> to redownload the files/plugin if necessary.`;
+
+        const forceUpdateBtn = forceHint.querySelector(".forceUpdateBtn");
+        forceUpdateBtn.addEventListener("click", () => {
+            forceHint.innerHTML = "Forcing update...";
+            adminSocket.emit("updateProject:start");
+        });
+
+        checkUpdateBtn.after(forceHint);
     });
 });
 
