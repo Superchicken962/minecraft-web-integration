@@ -80,7 +80,7 @@ class ProjectFileUpdater {
             if (!this.#latestVersion) return "Plugin already up to date";
 
             const fileName = "minecraft-web-integration";
-            const downloadUrl = `https://github.com/Superchicken962/minecraft-web-integration/releases/download/v${this.#latestVersion}/${fileName}.jar`;
+            const downloadUrl = `https://github.com/Superchicken962/minecraft-web-integration/releases/download/${this.#latestVersion}/${fileName}.jar`;
 
             // pathTo should be the path to the server.jar, so go back one and enter plugins folder.
             const serverPluginPath = path.join(config.server.pathTo, "../plugins");
