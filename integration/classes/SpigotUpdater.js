@@ -141,8 +141,9 @@ class SpigotUpdater {
             }
 
             // Pipe 'yes' to auto accept install.
-            exec(`yes | ${osInstaller} ${pkg}`, (err, stdout, stderr) => {
+            exec(`yes | ${osInstaller} ${pkg}`, (error, stdout, stderr) => {
                 if (error) {
+                    onprogress?.(`Error updating sdk: ${error.toString()}`);
                     resolve(false);
                     return;
                 }
