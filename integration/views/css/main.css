@@ -262,11 +262,17 @@ p.label.valid {
 .mainMenu {
     display: block;
     margin: auto;
+    position: relative;
     width: 60%;
     text-align: center;
     background-color: rgb(28,28,28);
     padding: 4px 12px;
     border-radius: 10px;
+}
+@media screen and (max-width: 1100px) {
+    .mainMenu {
+        width: 90%;
+    }
 }
 @media screen and (max-width: 500px) {
     .mainMenu {
@@ -596,4 +602,19 @@ textarea.textLog, textarea.mcTextLog {
 
 .hint a {
     color: grey;
+}
+
+.downloadWorldBtn {
+    display: flex;
+    margin: auto;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+.downloadWorldBtn.inline {
+    display: inline-flex;
+}
+.mainMenu .buttons {
+    display: block;
+    margin: auto;
 }

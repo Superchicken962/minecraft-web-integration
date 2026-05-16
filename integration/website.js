@@ -5,6 +5,7 @@ const path = require("path");
 const secret = require("./secret.json");
 const config = require("./config.json");
 const yaml = require("yaml");
+const { ZipArchive } = require("archiver-node");
 
 const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
@@ -548,6 +549,43 @@ app.post("/api/restart-web", async(req, res) => {
     setTimeout(() => {
         process.exit(0);
     }, 500);
+});
+
+// Routes to download server worlds.
+// TODO: Perhaps consider adding a toggle for admins to allow anyone to access this?
+const zipResp = (res, folder, fileName) => {
+    const worldFilePath = path.join(config.server?.pathTo, `../${folder}`);
+
+    res.attachment(`${fileName}.zip`);
+    res.type("application/zip");
+
+    const zip = new ZipArchive({
+        zlib: { level: 9 }
+    });
+
+    zip.on("error", (err) => {
+        res.status(500).send({ error: err });
+    });
+
+    zip.pipe(res);
+    zip.directory(worldFilePath, false);
+    zip.finalize();
+}
+
+app.get("/server/world/overworld", requireAdmin, async(req, res) => {
+    zipResp(res, "world", "overworld");
+});
+
+app.get("/server/world/end", requireAdmin, async(req, res) => {
+    zipResp(res, "world_the_end", "end");
+});
+
+app.get("/server/world/nether", requireAdmin, async(req, res) => {
+    zipResp(res, "world_nether", "nether");
+});
+
+app.get("*all", (req, res) => {
+    res.status(404).send("Not Found");
 });
 
 async function checkUpToDate() {
