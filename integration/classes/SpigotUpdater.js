@@ -196,7 +196,6 @@ class SpigotUpdater {
      */
     #runBuildTools(buildToolsPath, onprogress) {
         return new Promise((resolve) => {
-            console.log('lol', path.basename(buildToolsPath));
             exec(`cd ${path.dirname(buildToolsPath)} && java -jar "${path.basename(buildToolsPath)}"`, async(error, stdout, stderr) => {
                 if (error) {
                     onprogress?.(`Error running build tools: ${error.message}`);
