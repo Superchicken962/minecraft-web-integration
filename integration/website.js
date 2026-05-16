@@ -11,7 +11,6 @@ const { Server } = require("socket.io");
 const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket, getAdminCount, serverInfo, getPluginConfig, updatePluginConfig } = require("./functions");
 const { requireAdmin } = require("./middleware");
 const { minecraftServer } = require("./DataStorage");
-const { SpigotUpdater } = require("./classes/SpigotUpdater");
 let upToDate = true;
 
 /** @type { Server } */
@@ -568,10 +567,5 @@ async function checkUpToDate() {
 setTimeout(checkUpToDate, 2500);
 // Re-check for updates every 1 hour.
 setInterval(checkUpToDate, (1000 * 60 * 60));
-
-const su = new SpigotUpdater();
-su.updateLatest((msg) => {
-    console.log(`[Spigot Update] ${msg}`);
-});
 
 exports.router = app;

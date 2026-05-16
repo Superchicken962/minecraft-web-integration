@@ -6,3 +6,5 @@ plugin/bin
 integration/clone
 integration_backup/
 .env
+process.lock
+server.outdated

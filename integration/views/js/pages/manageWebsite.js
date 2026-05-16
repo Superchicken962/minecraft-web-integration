@@ -153,3 +153,21 @@ restartWebBtn.addEventListener("click", async() => {
         window.location = "/";
     }, 1500);
 });
+
+// Handle starting minecraft update + showing logs. 
+const mcUpdateProgressBox = document.querySelector("textarea.mcTextLog") || document.createElement("textarea");
+mcUpdateProgressBox.className = "mcTextLog";
+mcUpdateProgressBox.disabled = true;
+
+const mcUpdateBtn = document.querySelector(".updateMcBtn");
+mcUpdateBtn?.addEventListener("click", async() => {
+    mcUpdateBtn.classList.add("disabled");
+    mcUpdateBtn.before(mcUpdateProgressBox);
+    mcUpdateProgressBox.value = "";
+
+    adminSocket.emit("updateMinecraft:start");
+});
+
+adminSocket.on("updateMinecraft:progress", (data) => {
+    mcUpdateProgressBox.value += `${data.message}\n`;
+});

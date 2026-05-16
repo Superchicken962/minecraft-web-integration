@@ -12,6 +12,7 @@ const package = require("./package.json");
 const { minecraftServer } = require("./DataStorage");
 const { ProjectFileUpdater } = require("./classes/ProjectUpdater");
 const yaml = require("yaml");
+const { SpigotUpdater } = require("./classes/SpigotUpdater");
 
 const serverInfo = {
     readConfig: async function() {
@@ -880,6 +881,60 @@ function updatePluginConfig(data) {
     return updateYamlFileValues(path.join(config.server?.pathTo, `../plugins/${PLUGIN_NAME}/config.yml`), data);
 }
 
+const minecraftUpdateStatus = {
+    updating: false,
+    logs: []
+};
+
+/**
+ * Update minecraft server version.
+ * 
+ * @param { (msg: String, data: Object) => {} } onprogress - On progress event. 
+ */
+async function updateMinecraftVersion(onprogress) {
+    if (minecraftUpdateStatus.updating) {
+        console.warn("Minecraft already updating!");
+        return;
+    }
+
+    minecraftUpdateStatus.updating = true;
+    minecraftUpdateStatus.logs = [];
+
+    const progress = (message, data) => {
+        minecraftUpdateStatus.logs.push({ ...data, message});
+        onprogress?.(message, data);
+    }
+
+    if (minecraftServer.running) {
+        progress("Stopping minecraft server...", {});
+        await minecraftServer.stop();
+    }
+
+    progress("Starting update...", {});
+    const su = new SpigotUpdater();
+    const success = await su.updateLatest((msg) => {
+        progress(msg, { date: new Date() });
+    });
+
+    minecraftUpdateStatus.updating = false;
+    
+    if (!success) {
+        progress("Update Failed");
+        return;
+    }
+
+    // Remove file indicating server was oudated, if it exists.
+    const outdatedFilePath = path.join(__dirname, "server.outdated");
+    if (fs.existsSync(outdatedFilePath)) {
+        await fs.promises.rm(outdatedFilePath);
+    }
+
+    progress("Update complete!", {});
+    setTimeout(() => {
+        process.exit(0);
+    }, 2500);
+}
+
 module.exports = {
     serverInfo,
     askSocket,
@@ -903,5 +958,7 @@ module.exports = {
     projectUpdateStatus,
     getAdminCount,
     getPluginConfig,
-    updatePluginConfig
+    updatePluginConfig,
+    minecraftUpdateStatus,
+    updateMinecraftVersion
 };

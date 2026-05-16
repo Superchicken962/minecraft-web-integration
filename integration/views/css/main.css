@@ -503,7 +503,7 @@ body:has(.updateNotice) {
     border-left: 4px solid rgb(180, 200, 0);
 }
 
-textarea.textLog {
+textarea.textLog, textarea.mcTextLog {
     display: block;
     margin: auto;
     resize: none;

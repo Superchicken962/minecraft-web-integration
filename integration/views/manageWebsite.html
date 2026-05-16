@@ -11,7 +11,7 @@
     <%- include("includes/header.html"); %>
     
     <div class="mainMenu">
-        <h2>Installation</h2>
+        <h2>Project Installation</h2>
 
         <div class="updateInstructions <%= (upToDate) ? "uptodate" : "available" %>">
             <% if (!upToDate) { %>
@@ -46,6 +46,28 @@
 
         <a class="btn neutral restartWebBtn">Restart Web Server</a>
         <p class="hint">Restarting Web Server will shutdown the minecraft server if it is not already!</p>
+    </div>
+
+    <div class="mainMenu">
+        <h2>Minecraft Server Installation</h2>
+
+        <div class="updateInstructions <%= serverOutdated ? "available" : "uptodate" %>">
+            <% if (serverOutdated) { %>
+                <h3>Outdated - Update Server</h3>
+    
+                <p>The server will need to be stopped in order to update.</p>
+
+                <% if (mcUpdateStatus.updating) { %>
+                    <textarea class="mcTextLog" disabled><%= mcUpdateStatus.logs.map(l => l.message).join("\n") %><%- "\n" %></textarea>
+                <% } %>
+
+                <a class="btn good updateMcBtn <%= (mcUpdateStatus.updating) ? "disabled" : "" %>">Update</a>
+            <% } else { %>
+                <h3>Up To Date!</h3>
+            <% } %>
+        </div>
+
+        <p class="hint">This is determined when the server is started. To see the updater, restart the minecraft server for it to recognise.</p>
     </div>
 
     <div class="mainMenu">

@@ -41,13 +41,13 @@ class SpigotUpdater {
         }
 
         // Check the server plugin path is configured.
-        const serverPluginPath = path.join(config.server?.pathTo, "../plugins");
-        if (!config.server?.pathTo || !serverPluginPath) {
+        const serverDirectory = path.join(config.server?.pathTo, "../");
+        if (!config.server?.pathTo || !serverDirectory) {
             onprogress?.("Build tools fetch failed: No valid server path provided in config!");
             return resolve(false);
         }
 
-        const btPath = path.join(serverPluginPath, `BuildTools_MWI${this.#REQUIRED_JAVA_VERSION}.jar`);
+        const btPath = path.join(serverDirectory, `BuildTools_MWI${this.#REQUIRED_JAVA_VERSION}.jar`);
 
         // Try downloading build tools.
         onprogress?.("Getting Spigot BuildTools...");
@@ -61,7 +61,6 @@ class SpigotUpdater {
         // Now run buildtools.
         const runBt = await this.#runBuildTools(btPath, onprogress);
         if (!runBt) {
-            onprogress?.("Failed to run build tools!");
             return false;
         }
 
@@ -197,8 +196,10 @@ class SpigotUpdater {
      */
     #runBuildTools(buildToolsPath, onprogress) {
         return new Promise((resolve) => {
-            exec(`java -jar ${buildToolsPath}`, (error, stdout, stderr) => {
+            console.log('lol', path.basename(buildToolsPath));
+            exec(`cd ${path.dirname(buildToolsPath)} && java -jar "${path.basename(buildToolsPath)}"`, async(error, stdout, stderr) => {
                 if (error) {
+                    onprogress?.(`Error running build tools: ${error.message}`);
                     return resolve(false);
                 }
 

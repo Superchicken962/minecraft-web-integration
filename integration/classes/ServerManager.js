@@ -94,7 +94,7 @@ class ServerManager {
      * 
      * @returns { Promise }
      */
-    stop() {        
+    stop() {
         return new Promise((resolve, reject) => {
             if (!this.#process) {
                 reject("Server is not running!");
@@ -203,6 +203,11 @@ class ServerManager {
         this.#logs.push({
             message, isError
         });
+
+        // Detect if an update is required, then write a file so this can be recognised.
+        if (message.includes("Please download a new build as per instructions from")) {
+            fs.promises.writeFile(path.join(__dirname, "../server.outdated"), new Date().toISOString(), "utf-8");
+        }
 
         // Trim logs to ensure it does not grow infinitely.
         this.#logs.slice(-MAX_STORED_LOGS);
