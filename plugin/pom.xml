@@ -21,9 +21,15 @@
       <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.21.9-R0.1-SNAPSHOT</version>
+            <version>26.1.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
       </dependency>
+	  <dependency>
+	 		 <groupId>org.spigotmc</groupId>
+	 		 <artifactId>spigot-api</artifactId>
+	  		<version>26.1.2-R0.1-20260509.044742-7</version>
+	  		<classifier>javadoc</classifier>
+	  </dependency>
       <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

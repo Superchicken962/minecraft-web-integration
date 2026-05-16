@@ -1,5 +1,7 @@
 const { spawn } = require("child_process");
 const { Server } = require("socket.io");
+const fs = require("node:fs");
+const path = require("node:path");
 
 /**
  * Converts gigabytes into megabyte memory format for minecraft server.
@@ -74,10 +76,15 @@ class ServerManager {
         }
 
         this.#process = this.#newServerProcess(this.#serverPath, this.memory);
+        this.#savePIDToFile();
+
         this.#process.on("exit", () => {
             // Set running to false, and delete process whenever it exits, as to do it for server crashes too.
             this.#process = null;
             this.running = false;
+
+            // Ensure we delete the file containing the pid.
+            this.#deleteSavedPID();
         });
         this.running = true;
     }
@@ -122,6 +129,30 @@ class ServerManager {
                 });
             });
         });
+    }
+
+    /**
+     * Saves process id to temporary file for identification later if needed.
+     * 
+     * @returns { Promise }
+     */
+    async #savePIDToFile() {
+        const pid = this.#process?.pid;
+        if (!pid) return;
+
+        return fs.promises.writeFile(path.join(__dirname, "../process.lock"), pid.toString(), "utf-8");
+    }
+
+    /**
+     * Delete saved process id file.
+     * 
+     * @returns { Promise }
+     */
+    #deleteSavedPID() {
+        const pth = path.join(__dirname, "../process.lock");
+        if (!fs.existsSync(pth)) return;
+    
+        return fs.promises.rm(path.join(__dirname, "../process.lock"));
     }
 
     /**

@@ -10,6 +10,8 @@ const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
 const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket, getAdminCount, serverInfo, getPluginConfig, updatePluginConfig } = require("./functions");
 const { requireAdmin } = require("./middleware");
+const { minecraftServer } = require("./DataStorage");
+const { SpigotUpdater } = require("./classes/SpigotUpdater");
 let upToDate = true;
 
 /** @type { Server } */
@@ -536,6 +538,19 @@ app.post("/api/config.yml", async(req, res, next) => {
     res.sendStatus(201);
 });
 
+app.post("/api/restart-web", async(req, res) => {
+    // Stop minecraft server if it is running first.
+    if (minecraftServer.running) {
+        await minecraftServer.stop();
+    }
+    
+    res.sendStatus(200);
+    
+    setTimeout(() => {
+        process.exit(0);
+    }, 500);
+});
+
 async function checkUpToDate() {
     // Do not check again if we already know it's outdated.
     if (!upToDate) return;
@@ -553,5 +568,10 @@ async function checkUpToDate() {
 setTimeout(checkUpToDate, 2500);
 // Re-check for updates every 1 hour.
 setInterval(checkUpToDate, (1000 * 60 * 60));
+
+const su = new SpigotUpdater();
+su.updateLatest((msg) => {
+    console.log(`[Spigot Update] ${msg}`);
+});
 
 exports.router = app;

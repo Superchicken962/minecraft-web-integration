@@ -131,3 +131,25 @@ async function savePluginConfig() {
         saveBtn.classList.remove("disabled"); 
     }, 3000);
 }
+
+const restartWebBtn = document.querySelector(".restartWebBtn");
+restartWebBtn.addEventListener("click", async() => {
+    const headers = {
+        "Content-type": "application/json"
+    };
+
+    const text = document.createElement("p");
+    text.textContent = "Restarting Web Server...";
+    restartWebBtn.replaceWith(text);
+    
+    const resp = await fetch("/api/restart-web", { method: "POST", headers });
+    if (!resp.ok) {
+        console.warn("Failed to restart web server");
+        text.replaceWith(restartWebBtn);
+        return;
+    }
+
+    setTimeout(() => {
+        window.location = "/";
+    }, 1500);
+});

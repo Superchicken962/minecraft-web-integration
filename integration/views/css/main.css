@@ -492,6 +492,7 @@ body:has(.updateNotice) {
     margin: auto;
     width: fit-content;
     padding: 4px 16px;
+    margin-bottom: 15px;
 }
 .updateInstructions.uptodate {
     background-color: rgba(0, 200, 0, 0.2);
