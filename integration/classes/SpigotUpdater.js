@@ -140,7 +140,8 @@ class SpigotUpdater {
                     break;
             }
 
-            exec(`${osInstaller} ${pkg}`, (err, stdout, stderr) => {
+            // Pipe 'yes' to auto accept install.
+            exec(`yes | ${osInstaller} ${pkg}`, (err, stdout, stderr) => {
                 if (error) {
                     resolve(false);
                     return;
