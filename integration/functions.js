@@ -48,7 +48,7 @@ const serverInfo = {
      * 
      * @param { Client } client - Discord bot client.
      * @param { Server } io - Socket io server.
-     * @returns 
+     * @returns { Promise }
      */
     update: async function(client, io) {
         const setUpdateTimeout = () => {
