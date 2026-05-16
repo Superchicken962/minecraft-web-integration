@@ -492,6 +492,7 @@ body:has(.updateNotice) {
     margin: auto;
     width: fit-content;
     padding: 4px 16px;
+    margin-bottom: 15px;
 }
 .updateInstructions.uptodate {
     background-color: rgba(0, 200, 0, 0.2);
@@ -502,7 +503,7 @@ body:has(.updateNotice) {
     border-left: 4px solid rgb(180, 200, 0);
 }
 
-textarea.textLog {
+textarea.textLog, textarea.mcTextLog {
     display: block;
     margin: auto;
     resize: none;

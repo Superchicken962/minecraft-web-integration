@@ -5,9 +5,10 @@ const secret = require("../secret.json");
 const { minecraftServer } = require("../DataStorage");
 const fs = require("node:fs").promises;
 const path = require("node:path");
-const { deepReadDirectory, getLatestProjectVersion, askSocket, adminSocket, updateProject, projectUpdateStatus } = require("../functions");
+const { deepReadDirectory, getLatestProjectVersion, askSocket, adminSocket, updateProject, projectUpdateStatus, minecraftUpdateStatus, updateMinecraftVersion } = require("../functions");
 const package = require("../package.json");
 const { Server } = require("socket.io");
+const { existsSync } = require("node:fs");
 
 /**
  * @param { Server } io 
@@ -30,12 +31,28 @@ exports.register = (io) => {
         });
     });
 
+    adminSocket.listenFor("updateMinecraft:start", (socket) => {
+        updateMinecraftVersion((msg, data) => {
+            io.of("/admin").emit("updateMinecraft:progress", { ...data, message: msg });
+        });
+    });
+
     app.get("/", async(req, res) => {
-        const directory = await deepReadDirectory(path.join(__dirname, "../"), ["node_modules"], false);
+        // Not being used at the moment.
+        // const directory = await deepReadDirectory(path.join(__dirname, "../"), ["node_modules"], false);
 
         const latestPackage = await getLatestProjectVersion();
+        
+        const oudatedFilePath = path.join(__dirname, "../server.outdated");
+        const serverOutdated = existsSync(oudatedFilePath);
 
-        res.render("manageWebsite.html", { directory, package, latestPackage, updateStatus: projectUpdateStatus });
+        res.render("manageWebsite.html", {
+            package,
+            latestPackage,
+            updateStatus: projectUpdateStatus,
+            serverOutdated,
+            mcUpdateStatus: minecraftUpdateStatus
+        });
     });   
     
     return app;

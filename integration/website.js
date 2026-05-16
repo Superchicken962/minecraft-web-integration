@@ -10,6 +10,7 @@ const discord = require("./discordFunctions");
 const { Server } = require("socket.io");
 const { askSocket, validateConfigurations, getRequiredSecretConfigFields, getRequiredConfigFields, calculateMemory, isAdmin, readJsonFile, getDeepObjectKeys, parseConfigFormSaveData, combineObjects, checkProjectUpToDate, adminSocket, getAdminCount, serverInfo, getPluginConfig, updatePluginConfig } = require("./functions");
 const { requireAdmin } = require("./middleware");
+const { minecraftServer } = require("./DataStorage");
 let upToDate = true;
 
 /** @type { Server } */
@@ -534,6 +535,19 @@ app.post("/api/config.yml", async(req, res, next) => {
     }
 
     res.sendStatus(201);
+});
+
+app.post("/api/restart-web", async(req, res) => {
+    // Stop minecraft server if it is running first.
+    if (minecraftServer.running) {
+        await minecraftServer.stop();
+    }
+    
+    res.sendStatus(200);
+    
+    setTimeout(() => {
+        process.exit(0);
+    }, 500);
 });
 
 async function checkUpToDate() {
