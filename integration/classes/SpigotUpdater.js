@@ -9,6 +9,8 @@ const { minecraftServer } = require("../DataStorage");
 class SpigotUpdater {
     #LATEST_BUILD_DOWNLOAD_LINK = "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar";
     #REQUIRED_JAVA_VERSION = "25";
+    // Link to download .rpm for non debian - use oracle linux, idk if this works for other rhl distros and such.
+    #JAVA_RPM_DOWNLOAD = "https://yum.oracle.com/repo/OracleLinux/OL9/appstream/x86_64/getPackage/java-25-openjdk-headless-25.0.3.0.9-1.0.1.el9.x86_64.rpm";
 
     /**
      * Update to the latest spigot version.
@@ -110,7 +112,7 @@ class SpigotUpdater {
      */
     #updateJavaSDK(onprogress) {
         return new Promise(async(resolve, reject) => {
-            const pkg = `openjdk-${this.#REQUIRED_JAVA_VERSION}-jdk-headless`;
+            let pkg = `openjdk-${this.#REQUIRED_JAVA_VERSION}-jdk-headless`;
 
             const os = (await this.#getOSDistribution()) || "debian";
             if (os === "windows") {
@@ -124,32 +126,73 @@ class SpigotUpdater {
 
             // Change install commadn based on the distribution.
             let osInstaller = "sudo apt install";
+            let localInstall = false;
             switch(os) {
                 case "debian":
                     osInstaller = "sudo apt-get install";
                     break;
 
+                case "arch":
+                    osInstaller = "sudo pacman -S";
+                    break;
+
+                // For the following distros, download the rpm manually and then run it.
                 case "rhel":
                 case "centos":
                 case "fedora":
                     osInstaller = "sudo yum install";
-                    break;
-
-                case "arch":
-                    osInstaller = "sudo pacman -S";
+                    pkg = "javaRpm.rpm";
+                    localInstall = true;
+                    await this.#downloadFile(this.#JAVA_RPM_DOWNLOAD, pkg);
                     break;
             }
 
             // Pipe 'yes' to auto accept install.
-            exec(`yes | ${osInstaller} ${pkg}`, (error, stdout, stderr) => {
+            exec(`yes | ${osInstaller} ${pkg}`, async(error, stdout, stderr) => {
                 if (error) {
                     onprogress?.(`Error updating sdk: ${error.toString()}`);
                     resolve(false);
                     return;
                 }
 
+                // If we downloaded the rpm file manually, delete it when done.
+                if (localInstall && fs.existsSync(pkg)) {
+                    await fs.promises.rm(path.join(__dirname, pkg));
+                }
+
                 resolve(true);
             });
+        });
+    }
+
+    /**
+     * Download a file from a url.
+     * 
+     * @param { String } url - Url to download from.
+     * @param { String } downloadPath - File to save as.
+     * @returns { Promise<Boolean> } Was the download a success?
+     */
+    #downloadFile(url, downloadPath) {
+        return new Promise((resolve, reject) => {
+            const writeStream = fs.createWriteStream(downloadPath);
+            const req = await fetch(url);
+
+            if (!req.ok) {
+                writeStream.close();
+                return reject(false);
+            }
+
+            writeStream.on("finish", () => {
+                writeStream.close();
+                return resolve(true);
+            });
+
+            writeStream.on("error", async() => {
+                await fs.promises.unlink(downloadPath);
+                return reject(false);
+            });
+
+            Readable.fromWeb(req.body).pipe(writeStream);
         });
     }
 
@@ -161,32 +204,17 @@ class SpigotUpdater {
      * @returns { Promise<Boolean> }
      */
     #downloadBuildTools(buildToolsPath, onprogress) {
-        return new Promise(async(resolve) => {
-            if (fs.existsSync(buildToolsPath)) {
-                onprogress?.("Existing BuildTools file found! Using that. If this was not intentional, delete the file and rerun the script to redownload it.");
-                return resolve(true);
-            }
-    
-            const writeStream = fs.createWriteStream(buildToolsPath);
-            const req = await fetch(this.#LATEST_BUILD_DOWNLOAD_LINK);
-    
-            if (!req.ok) {
-                writeStream.close();
-                return resolve(false);
-            }
-    
-            Readable.fromWeb(req.body).pipe(writeStream);
-    
-            writeStream.on("finish", () => {
-                writeStream.close();
-                return resolve(true);
-            });
+        if (fs.existsSync(buildToolsPath)) {
+            onprogress?.("Existing BuildTools file found! Using that. If this was not intentional, delete the file and rerun the script to redownload it.");
+            return true;
+        }
 
-            writeStream.on("error", () => {
-                fs.unlink(buildToolsPath);
-                return resolve(false);
-            });
-        });
+        try {
+            await this.#downloadFile(this.#LATEST_BUILD_DOWNLOAD_LINK, buildToolsPath);
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     /**
