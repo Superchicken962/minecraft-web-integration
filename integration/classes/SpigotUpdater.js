@@ -9,8 +9,6 @@ const { minecraftServer } = require("../DataStorage");
 class SpigotUpdater {
     #LATEST_BUILD_DOWNLOAD_LINK = "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar";
     #REQUIRED_JAVA_VERSION = "25";
-    // Link to download .rpm for non debian - use oracle linux, idk if this works for other rhl distros and such.
-    #JAVA_RPM_DOWNLOAD = "https://yum.oracle.com/repo/OracleLinux/OL9/appstream/x86_64/getPackage/java-25-openjdk-headless-25.0.3.0.9-1.0.1.el9.x86_64.rpm";
 
     /**
      * Update to the latest spigot version.
@@ -124,9 +122,8 @@ class SpigotUpdater {
             onprogress?.("Updating Java version...");
             onprogress?.(`Attempting to install ${pkg}...`);
 
-            // Change install commadn based on the distribution.
+            // Change install command and package name based on the distribution.
             let osInstaller = "sudo apt install";
-            let localInstall = false;
             switch(os) {
                 case "debian":
                     osInstaller = "sudo apt-get install";
@@ -134,16 +131,14 @@ class SpigotUpdater {
 
                 case "arch":
                     osInstaller = "sudo pacman -S";
+                    pkg = `jre${this.#REQUIRED_JAVA_VERSION}-openjdk-headless`;
                     break;
 
-                // For the following distros, download the rpm manually and then run it.
                 case "rhel":
                 case "centos":
                 case "fedora":
                     osInstaller = "sudo yum install";
-                    pkg = "javaRpm.rpm";
-                    localInstall = true;
-                    await this.#downloadFile(this.#JAVA_RPM_DOWNLOAD, pkg);
+                    pkg = `jdk-${this.#REQUIRED_JAVA_VERSION}-headless`;
                     break;
             }
 
@@ -153,11 +148,6 @@ class SpigotUpdater {
                     onprogress?.(`Error updating sdk: ${error.toString()}`);
                     resolve(false);
                     return;
-                }
-
-                // If we downloaded the rpm file manually, delete it when done.
-                if (localInstall && fs.existsSync(pkg)) {
-                    await fs.promises.rm(path.join(__dirname, pkg));
                 }
 
                 resolve(true);
