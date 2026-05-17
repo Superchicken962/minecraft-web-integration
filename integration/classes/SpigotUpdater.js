@@ -1,7 +1,7 @@
 const fs = require("fs-extra");
 const path = require("node:path");
 const config = require("../config.json");
-const { exec } = require("node:child_process");
+const { exec, spawn } = require("node:child_process");
 const os = require("os");
 const { Readable } = require("node:stream");
 const { minecraftServer } = require("../DataStorage");
@@ -118,7 +118,7 @@ class SpigotUpdater {
                 return resolve(true); // Return true to continue update on windows.
             }
 
-            onprogress?.(`Your OS Distribution: ${os}. Not correct? Please install the package yourself using the correct package manager: ${pkg}`);
+            onprogress?.(`Your OS Distribution: ${os}. Not correct? Please install the Java JDK package yourself using the correct package manager.`);
             onprogress?.("Updating Java version...");
             onprogress?.(`Attempting to install ${pkg}...`);
 
@@ -216,12 +216,20 @@ class SpigotUpdater {
      */
     #runBuildTools(buildToolsPath, onprogress) {
         return new Promise((resolve) => {
-            exec(`cd ${path.dirname(buildToolsPath)} && java -jar "${path.basename(buildToolsPath)}"`, async(error, stdout, stderr) => {
-                if (error) {
-                    onprogress?.(`Error running build tools: ${error.message}`);
-                    return resolve(false);
-                }
+            const cmd = spawn("java", ["-jar", path.basename(buildToolsPath)], {
+                cwd: path.dirname(buildToolsPath)
+            });
 
+            cmd.stdout.on("data", (data) => {
+                onprogress?.(`[Build Tools] ${data.toString()}`);
+            });
+
+            cmd.stdout.on("error", () => {
+                onprogress?.(`Error running build tools: ${error.message}`);
+                return resolve(false);
+            });
+
+            cmd.stdout.on("close", async() => {
                 if (fs.existsSync(buildToolsPath)) {
                     onprogress?.("Deleting no longer required BuildTools...");
                     await fs.promises.rm(buildToolsPath);
