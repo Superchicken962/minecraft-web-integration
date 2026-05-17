@@ -173,7 +173,7 @@ class SpigotUpdater {
      * @returns { Promise<Boolean> } Was the download a success?
      */
     #downloadFile(url, downloadPath) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async(resolve, reject) => {
             const writeStream = fs.createWriteStream(downloadPath);
             const req = await fetch(url);
 
@@ -203,7 +203,7 @@ class SpigotUpdater {
      * @param { (message: String) => {} } onprogress - Progress callback, passed in from main function.
      * @returns { Promise<Boolean> }
      */
-    #downloadBuildTools(buildToolsPath, onprogress) {
+    async #downloadBuildTools(buildToolsPath, onprogress) {
         if (fs.existsSync(buildToolsPath)) {
             onprogress?.("Existing BuildTools file found! Using that. If this was not intentional, delete the file and rerun the script to redownload it.");
             return true;
